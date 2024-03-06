@@ -1,0 +1,30 @@
+server:
+  port: ${PORT:4001}
+
+spring:
+  data:
+    mongodb:
+      uri: ${MONGODB_URL}
+  application:
+    name: CLOUD-BACKEND-SERVICE
+  mail:
+    host: ${EMAIL_HOST}
+    port: 587
+    username: ${EMAIL}
+    password: ${PASSWORD}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+
+
+app:
+  mqtt:
+    broker: ${MQTT_BROKER}
+    username: ${MQTT_USERNAME}
+    clientId: ${spring.application.name}
+    password: ${MQTT_PASSWORD}
+  communication:
+    from: ${spring.mail.username}
