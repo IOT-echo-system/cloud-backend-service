@@ -21,7 +21,9 @@ data class Token(
     val createdAt: LocalDateTime = LocalDateTime.now(),
     var expiredAt: LocalDateTime,
     val userId: UserId,
-    val otpId: OtpId?
+    val otpId: OtpId?,
+    val accountId: String? = null,
+    val roleId: String? = null
 ) {
     fun setExpired(): Token {
         this.expiredAt = LocalDateTime.now().minusDays(1)

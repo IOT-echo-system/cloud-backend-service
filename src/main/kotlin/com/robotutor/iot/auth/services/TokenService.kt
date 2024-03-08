@@ -37,7 +37,7 @@ class TokenService(
 
     fun validate(token: String): Mono<ValidateTokenResponse> {
         return tokenRepository.findByValueAndExpiredAtAfter(token)
-            .map { ValidateTokenResponse(it.userId) }
+            .map { ValidateTokenResponse(userId = it.userId, accountId = it.accountId ?: "", roleId = it.roleId ?: "") }
             .switchIfEmpty {
                 createMonoError(UnAuthorizedException(IOTError.IOT0103))
             }

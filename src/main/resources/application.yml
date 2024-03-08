@@ -28,3 +28,14 @@ app:
     password: ${MQTT_PASSWORD}
   communication:
     from: ${spring.mail.username}
+  utils:
+    auth-service-base-url: http://localhost:${server.port}
+    open-api-endpoints:
+      - "/auth/sign-up"
+      - "/auth/login"
+      - "/auth/validate"
+      - "/auth/generate-otp"
+      - "/auth/verify-otp"
+    open-api-end-points-for-account:
+      - "/accounts"
+

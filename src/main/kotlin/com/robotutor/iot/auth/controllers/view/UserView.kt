@@ -49,4 +49,4 @@ data class UserSignUpResponse(val email: String, val userId: UserId, val name: S
 data class TokenResponse(val token: String, val success: Boolean)
 data class ResetPasswordResponse(val success: Boolean)
 
-data class ValidateTokenResponse(val userId: UserId)
+data class ValidateTokenResponse(val userId: UserId, val accountId: String, val roleId: String)
