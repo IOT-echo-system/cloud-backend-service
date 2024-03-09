@@ -1,6 +1,5 @@
 package com.robotutor.iot.utils.filters
 
-import com.robotutor.iot.logging.serializer.DefaultSerializer
 import com.robotutor.iot.utils.models.UserAuthenticationData
 import com.robotutor.iot.utils.utils.createMono
 import org.springframework.context.annotation.Configuration
@@ -21,10 +20,8 @@ class AuthenticationDataResolver : HandlerMethodArgumentResolver {
         bindingContext: BindingContext,
         exchange: ServerWebExchange
     ): Mono<Any> {
-        return createMono(exchange)
-            .map { serverWebExchange ->
-                val userAuthenticationData = serverWebExchange.request.headers.getFirst(AUTHORIZATION_HEADER_KEY)!!
-                DefaultSerializer.deserialize(userAuthenticationData, UserAuthenticationData::class.java)
-            }
+        return Mono.deferContextual { context ->
+            createMono(context.get(UserAuthenticationData::class.java))
+        }
     }
 }

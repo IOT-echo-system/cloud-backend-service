@@ -31,13 +31,22 @@ data class Token(
     }
 
     companion object {
-        fun generate(tokenId: String, userId: UserId, expiredAt: LocalDateTime, otpId: OtpId?): Token {
+        fun generate(
+            tokenId: String,
+            userId: UserId,
+            expiredAt: LocalDateTime,
+            otpId: OtpId?,
+            accountId: String?,
+            roleId: String?
+        ): Token {
             return Token(
                 tokenId = tokenId,
                 userId = userId,
                 value = generateTokenValue(),
                 expiredAt = expiredAt,
-                otpId = otpId
+                otpId = otpId,
+                accountId = accountId,
+                roleId = roleId
             )
         }
 

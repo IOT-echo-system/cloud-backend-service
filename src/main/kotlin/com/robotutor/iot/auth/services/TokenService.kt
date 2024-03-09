@@ -2,9 +2,11 @@ package com.robotutor.iot.auth.services
 
 
 import com.robotutor.iot.auth.controllers.view.ResetPasswordRequest
+import com.robotutor.iot.auth.controllers.view.UpdateTokenRequest
 import com.robotutor.iot.auth.controllers.view.UserLoginRequest
 import com.robotutor.iot.auth.controllers.view.ValidateTokenResponse
 import com.robotutor.iot.auth.exceptions.IOTError
+import com.robotutor.iot.auth.gateway.AccountServiceGateway
 import com.robotutor.iot.auth.models.*
 import com.robotutor.iot.auth.repositories.TokenRepository
 import com.robotutor.iot.logging.logOnError
@@ -26,18 +28,19 @@ class TokenService(
     private val tokenRepository: TokenRepository,
     private val idGeneratorService: IdGeneratorService,
     private val userService: UserService,
-    private val mqttPublisher: MqttPublisher
+    private val mqttPublisher: MqttPublisher,
+    private val accountServiceGateway: AccountServiceGateway
 ) {
 
     fun login(userLoginRequest: UserLoginRequest): Mono<Token> {
         return userService.verifyCredentials(userLoginRequest)
-            .flatMap { generateToken(it.userId, LocalDateTime.now().plusDays(7), null) }
+            .flatMap { generateToken(userId = it.userId, expiredAt = LocalDateTime.now().plusDays(7)) }
     }
 
 
     fun validate(token: String): Mono<ValidateTokenResponse> {
         return tokenRepository.findByValueAndExpiredAtAfter(token)
-            .map { ValidateTokenResponse(userId = it.userId, accountId = it.accountId ?: "", roleId = it.roleId ?: "") }
+            .map { ValidateTokenResponse(userId = it.userId, projectId = it.accountId ?: "", roleId = it.roleId ?: "") }
             .switchIfEmpty {
                 createMonoError(UnAuthorizedException(IOTError.IOT0103))
             }
@@ -45,7 +48,13 @@ class TokenService(
             .logOnError(errorCode = IOTError.IOT0103.errorCode, errorMessage = "Failed to validate token")
     }
 
-    fun generateToken(userId: UserId, expiredAt: LocalDateTime, otpId: OtpId?): Mono<Token> {
+    fun generateToken(
+        userId: UserId,
+        expiredAt: LocalDateTime,
+        otpId: OtpId? = null,
+        accountId: String? = null,
+        roleId: String? = null
+    ): Mono<Token> {
         return idGeneratorService.generateId(IdType.TOKEN_ID)
             .flatMap { tokenId ->
                 tokenRepository.save(
@@ -53,7 +62,9 @@ class TokenService(
                         tokenId = tokenId,
                         userId = userId,
                         expiredAt = expiredAt,
-                        otpId = otpId
+                        otpId = otpId,
+                        accountId = accountId,
+                        roleId = roleId
                     )
                 )
                     .auditOnSuccess(
@@ -93,5 +104,22 @@ class TokenService(
                 resetPasswordRequest.password
             )
         }
+    }
+
+    fun updateToken(updateTokenRequest: UpdateTokenRequest, userId: String): Mono<Token> {
+        return accountServiceGateway.isValidAccountAndRole(
+            userId,
+            updateTokenRequest.accountId,
+            updateTokenRequest.roleId
+        )
+            .flatMap {
+                generateToken(
+                    userId = userId,
+                    expiredAt = LocalDateTime.now().plusDays(7),
+                    otpId = null,
+                    accountId = updateTokenRequest.accountId,
+                    roleId = updateTokenRequest.roleId
+                )
+            }
     }
 }

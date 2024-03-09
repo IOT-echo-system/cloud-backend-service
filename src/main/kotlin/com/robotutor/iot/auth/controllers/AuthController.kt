@@ -4,6 +4,7 @@ import com.robotutor.iot.auth.controllers.view.*
 import com.robotutor.iot.auth.services.OtpService
 import com.robotutor.iot.auth.services.TokenService
 import com.robotutor.iot.auth.services.UserService
+import com.robotutor.iot.utils.models.UserAuthenticationData
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.*
 import reactor.core.publisher.Mono
@@ -26,7 +27,7 @@ class AuthController(
     }
 
     @GetMapping("/validate")
-    fun validateToken(@RequestHeader("Authorization") token: String = ""): Mono<ValidateTokenResponse> {
+    fun validateToken(@RequestHeader("authorization") token: String = ""): Mono<ValidateTokenResponse> {
         return tokenService.validate(token)
     }
 
@@ -46,5 +47,14 @@ class AuthController(
         @RequestHeader("Authorization") token: String = ""
     ): Mono<ResetPasswordResponse> {
         return tokenService.resetPassword(resetPasswordRequest, token).map { ResetPasswordResponse(true) }
+    }
+
+    @PostMapping("/update-token")
+    fun resetPassword(
+        @RequestBody @Validated updateTokenRequest: UpdateTokenRequest,
+        authenticationData: UserAuthenticationData
+    ): Mono<TokenResponse> {
+        return tokenService.updateToken(updateTokenRequest, authenticationData.userId)
+            .map { TokenResponse(it.value, true) }
     }
 }

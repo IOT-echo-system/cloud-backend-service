@@ -5,6 +5,7 @@ import com.robotutor.iot.logging.serializer.DefaultSerializer.serialize
 import com.robotutor.iot.utils.config.AppConfig
 import com.robotutor.iot.utils.exceptions.IOTError
 import com.robotutor.iot.utils.exceptions.UnAuthorizedException
+import com.robotutor.iot.utils.filters.views.UserAuthenticationResponseData
 import com.robotutor.iot.utils.models.UserAuthenticationData
 import com.robotutor.iot.utils.utils.createMono
 import com.robotutor.iot.utils.utils.createMonoError
@@ -20,8 +21,6 @@ import reactor.core.publisher.Mono
 import reactor.core.scheduler.Schedulers
 import java.time.LocalDateTime
 
-const val AUTHORIZATION_HEADER_KEY = "AUTHORIZATION_HEADER_KEY"
-
 @Component
 class ApiFilter(
     private val routeValidator: RouteValidator,
@@ -32,14 +31,10 @@ class ApiFilter(
         val startTime = LocalDateTime.now()
         return authorize(exchange)
             .flatMap { userAuthenticationData ->
-                if (isAllowedForAccounts(userAuthenticationData, exchange.request)) {
-                    createMono(userAuthenticationData)
-                } else {
-                    createMonoError(UnAuthorizedException(IOTError.IOT0101))
-                }
-            }
-            .flatMap { userAuthenticationData ->
-                chain.filter(addUserAuthenticationDataIntoRequestHeader(exchange, userAuthenticationData))
+                chain.filter(exchange)
+                    .contextWrite {
+                        it.put(UserAuthenticationData::class.java, userAuthenticationData)
+                    }
             }
             .onErrorResume {
                 val unAuthorizedException = UnAuthorizedException(IOTError.IOT0101)
@@ -58,44 +53,56 @@ class ApiFilter(
             .contextWrite { it.put("startTime", startTime) }
             .doFinally {
                 Mono.just("")
-                    .logOnSuccess("Successfully send api response")
+                    .logOnSuccess(
+                        "Successfully send api response",
+                        additionalDetails = mapOf(
+                            "method" to exchange.request.method,
+                            "path" to exchange.request.uri.path
+                        )
+                    )
                     .contextWrite { it.put(ServerWebExchange::class.java, exchange) }
                     .contextWrite { it.put("startTime", startTime) }
                     .subscribe()
             }
     }
 
-    private fun addUserAuthenticationDataIntoRequestHeader(
-        exchange: ServerWebExchange,
-        userAuthenticationData: UserAuthenticationData
-    ): ServerWebExchange {
-        return exchange.mutate()
-            .request { requestBuilder ->
-                requestBuilder.headers { httpHeaders ->
-                    httpHeaders.add(AUTHORIZATION_HEADER_KEY, serialize(userAuthenticationData))
-                }
-            }.build()
+    private fun authorize(exchange: ServerWebExchange): Mono<UserAuthenticationData> {
+        return Mono.deferContextual { context ->
+            try {
+                createMono(context.get(UserAuthenticationData::class.java))
+            } catch (ex: Exception) {
+                authorizeUser(exchange)
+            }
+        }
     }
 
-    private fun authorize(exchange: ServerWebExchange): Mono<UserAuthenticationData> {
+    private fun authorizeUser(exchange: ServerWebExchange): Mono<UserAuthenticationData> {
         return if (routeValidator.isSecured(exchange.request)) {
             webClient.get(
                 baseUrl = appConfig.authServiceBaseUrl,
                 path = "/auth/validate",
-                returnType = UserAuthenticationData::class.java,
-                headers = exchange.request.headers.mapValues { it.value.joinToString(",") }
+                returnType = UserAuthenticationResponseData::class.java,
             )
+                .map { userAuthenticationResponseData -> UserAuthenticationData.from(userAuthenticationResponseData) }
+                .contextWrite { it.put(ServerWebExchange::class.java, exchange) }
         } else {
             createMono(UserAuthenticationData("Authorization not required", "account", "role"))
         }
+            .flatMap { userAuthenticationData ->
+                if (isAllowedForAccounts(userAuthenticationData, exchange.request)) {
+                    createMono(userAuthenticationData)
+                } else {
+                    createMonoError(UnAuthorizedException(IOTError.IOT0101))
+                }
+            }
     }
 
     private fun isAllowedForAccounts(
         userAuthenticationData: UserAuthenticationData,
         request: ServerHttpRequest
     ): Boolean {
-        return userAuthenticationData.accountId.isNotBlank() && userAuthenticationData.roleId.isNotBlank() || routeValidator.isOpenForAccounts(
-            request
-        )
+        val areAccountAndRoleNotBlank =
+            userAuthenticationData.accountId.isNotBlank() && userAuthenticationData.roleId.isNotBlank()
+        return areAccountAndRoleNotBlank || routeValidator.isOpenForAccounts(request)
     }
 }

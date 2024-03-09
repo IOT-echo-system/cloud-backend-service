@@ -6,6 +6,7 @@ import org.springframework.stereotype.Component
 import org.springframework.util.LinkedMultiValueMap
 import org.springframework.util.MultiValueMap
 import org.springframework.web.reactive.function.client.WebClient
+import org.springframework.web.server.ServerWebExchange
 import org.springframework.web.util.UriComponentsBuilder
 import reactor.core.publisher.Mono
 import java.time.LocalDateTime
@@ -24,26 +25,30 @@ class WebClientWrapper(private val webClient: WebClient) {
     ): Mono<T> {
         val url = createUrlForRequest(baseUrl, path, uriVariables, queryParams)
 
-        return webClient.get()
-            .uri(url)
-            .headers { h ->
-                headers.map {
-                    h.set(it.key, it.value)
+        return Mono.deferContextual { ctx ->
+            val exchange = ctx.get(ServerWebExchange::class.java)
+            webClient.get()
+                .uri(url)
+                .headers { h ->
+                    h.putAll(exchange.request.headers)
+                    headers.map {
+                        h.set(it.key, it.value)
+                    }
                 }
-            }
-            .retrieve()
-            .bodyToMono(returnType)
-            .logOnSuccess(
-                message = "GET request to Service successful",
-                skipAdditionalDetails = skipLoggingAdditionalDetails,
-                skipResponseBody = skipLoggingResponseBody,
-            )
-            .logOnError(
-                errorCode = "API_FAILURE",
-                errorMessage = "GET request to Service failed",
-                skipAdditionalDetails = skipLoggingAdditionalDetails
-            )
-            .contextWrite { it.put("startTime", LocalDateTime.now()) }
+                .retrieve()
+                .bodyToMono(returnType)
+                .logOnSuccess(
+                    message = "GET request to Service successful",
+                    skipAdditionalDetails = skipLoggingAdditionalDetails,
+                    skipResponseBody = skipLoggingResponseBody,
+                )
+                .logOnError(
+                    errorCode = "API_FAILURE",
+                    errorMessage = "GET request to Service failed",
+                    skipAdditionalDetails = skipLoggingAdditionalDetails
+                )
+                .contextWrite { it.put("startTime", LocalDateTime.now()) }
+        }
     }
 
     fun <T> post(
@@ -60,27 +65,32 @@ class WebClientWrapper(private val webClient: WebClient) {
 
         val url = createUrlForRequest(baseUrl, path, uriVariables, queryParams)
 
-        return webClient
-            .post().uri(url)
-            .headers { h ->
-                headers.map {
-                    h.set(it.key, it.value)
-                }
-            }.bodyValue(body)
-            .retrieve()
-            .bodyToMono(returnType)
+        return Mono.deferContextual { ctx ->
+            val exchange = ctx.get(ServerWebExchange::class.java)
+            webClient
+                .post()
+                .uri(url)
+                .headers { h ->
+                    h.putAll(exchange.request.headers)
+                    headers.map {
+                        h.set(it.key, it.value)
+                    }
+                }.bodyValue(body)
+                .retrieve()
+                .bodyToMono(returnType)
 
-            .logOnSuccess(
-                message = "POST request to Service successful",
-                skipAdditionalDetails = skipLoggingAdditionalDetails,
-                skipResponseBody = skipLoggingResponseBody,
-            )
-            .logOnError(
-                errorCode = "API_FAILURE",
-                errorMessage = "POST request to Service failed",
-                skipAdditionalDetails = skipLoggingAdditionalDetails,
-            )
-            .contextWrite { it.put("startTime", LocalDateTime.now()) }
+                .logOnSuccess(
+                    message = "POST request to Service successful",
+                    skipAdditionalDetails = skipLoggingAdditionalDetails,
+                    skipResponseBody = skipLoggingResponseBody,
+                )
+                .logOnError(
+                    errorCode = "API_FAILURE",
+                    errorMessage = "POST request to Service failed",
+                    skipAdditionalDetails = skipLoggingAdditionalDetails,
+                )
+                .contextWrite { it.put("startTime", LocalDateTime.now()) }
+        }
     }
 
     private fun createUrlForRequest(

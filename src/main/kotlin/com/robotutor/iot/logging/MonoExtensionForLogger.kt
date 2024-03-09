@@ -90,6 +90,8 @@ fun <T> Mono<T>.logOnSuccess(
                 errorCode = null,
                 requestDetails = RequestDetails.create(signal.contextView),
                 responseDetails = ResponseDetails.create(signal.contextView),
+                additionalDetails = modifiedAdditionalDetails
+
             )
             logger.info(details = logDetails)
         }

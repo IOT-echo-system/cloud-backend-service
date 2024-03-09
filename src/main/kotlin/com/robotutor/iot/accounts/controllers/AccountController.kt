@@ -1,5 +1,6 @@
 package com.robotutor.iot.accounts.controllers
 
+import com.robotutor.iot.accounts.controllers.views.AccountValidationRequest
 import com.robotutor.iot.accounts.controllers.views.AccountWithRoles
 import com.robotutor.iot.accounts.controllers.views.AddAccountRequest
 import com.robotutor.iot.accounts.services.AccountService
@@ -33,5 +34,13 @@ class AccountController(private val accountService: AccountService, private val 
                 roleService.getRoles(account.users.first().roles)
                     .map { roles -> AccountWithRoles.from(account, roles) }
             }
+    }
+
+    @PostMapping("/validate")
+    fun isValidAccount(
+        @RequestBody accountValidationRequest: AccountValidationRequest,
+        userAuthenticationData: UserAuthenticationData
+    ): Mono<Map<String, Boolean>> {
+        return accountService.isAccountExistsWithRole(accountValidationRequest, userAuthenticationData.userId)
     }
 }

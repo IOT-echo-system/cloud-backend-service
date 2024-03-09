@@ -12,6 +12,6 @@ class RouteValidator(private val appConfig: AppConfig) {
     }
 
     fun isOpenForAccounts(request: ServerHttpRequest): Boolean {
-        return appConfig.openApiEndPointsForAccount.any {  request.uri.path == it }
+        return appConfig.openApiEndPointsForAccount.any { request.uri.path == it }
     }
 }

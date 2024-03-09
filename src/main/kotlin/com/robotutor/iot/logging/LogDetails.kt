@@ -27,6 +27,7 @@ data class LogDetails(
             responseDetails: ResponseDetails? = null,
             traceId: String? = null,
             searchableFields: Map<String, Any> = emptyMap(),
+            additionalDetails: Map<String, Any> = emptyMap(),
         ): LogDetails {
             return LogDetails(
                 message = message,
@@ -41,6 +42,7 @@ data class LogDetails(
                 responseBody = responseDetails?.body,
                 traceId = traceId,
                 searchableFields = searchableFields,
+                additionalDetails = additionalDetails
             )
         }
     }

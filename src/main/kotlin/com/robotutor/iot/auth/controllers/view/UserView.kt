@@ -38,6 +38,14 @@ data class ResetPasswordRequest(
 )
 
 
+data class UpdateTokenRequest(
+    @field:NotBlank(message = "AccountId should not be blank!")
+    val accountId: String,
+    @field:NotBlank(message = "RoleId should not be blank")
+    val roleId: String
+)
+
+
 data class UserSignUpResponse(val email: String, val userId: UserId, val name: String) {
     companion object {
         fun create(userDetails: UserDetails): UserSignUpResponse {
@@ -49,4 +57,4 @@ data class UserSignUpResponse(val email: String, val userId: UserId, val name: S
 data class TokenResponse(val token: String, val success: Boolean)
 data class ResetPasswordResponse(val success: Boolean)
 
-data class ValidateTokenResponse(val userId: UserId, val accountId: String, val roleId: String)
+data class ValidateTokenResponse(val userId: UserId, val projectId: String, val roleId: String)
