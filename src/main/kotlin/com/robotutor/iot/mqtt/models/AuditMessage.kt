@@ -27,5 +27,6 @@ enum class AuditEvent {
     VERIFY_OTP,
     RESET_PASSWORD,
     SEND_EMAIL,
-    CREATE_ACCOUNT
+    CREATE_ACCOUNT,
+    LOG_OUT
 }

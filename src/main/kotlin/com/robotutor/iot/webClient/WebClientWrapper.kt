@@ -13,6 +13,7 @@ import java.time.LocalDateTime
 
 @Component
 class WebClientWrapper(private val webClient: WebClient) {
+
     fun <T> get(
         baseUrl: String,
         path: String,
@@ -41,11 +42,13 @@ class WebClientWrapper(private val webClient: WebClient) {
                     message = "GET request to Service successful",
                     skipAdditionalDetails = skipLoggingAdditionalDetails,
                     skipResponseBody = skipLoggingResponseBody,
+                    additionalDetails = mapOf("method" to "GET", "path" to url)
                 )
                 .logOnError(
                     errorCode = "API_FAILURE",
                     errorMessage = "GET request to Service failed",
-                    skipAdditionalDetails = skipLoggingAdditionalDetails
+                    skipAdditionalDetails = skipLoggingAdditionalDetails,
+                    additionalDetails = mapOf("method" to "GET", "path" to url)
                 )
                 .contextWrite { it.put("startTime", LocalDateTime.now()) }
         }
@@ -78,16 +81,17 @@ class WebClientWrapper(private val webClient: WebClient) {
                 }.bodyValue(body)
                 .retrieve()
                 .bodyToMono(returnType)
-
                 .logOnSuccess(
                     message = "POST request to Service successful",
                     skipAdditionalDetails = skipLoggingAdditionalDetails,
                     skipResponseBody = skipLoggingResponseBody,
+                    additionalDetails = mapOf("method" to "POST", "path" to url)
                 )
                 .logOnError(
                     errorCode = "API_FAILURE",
                     errorMessage = "POST request to Service failed",
                     skipAdditionalDetails = skipLoggingAdditionalDetails,
+                    additionalDetails = mapOf("method" to "POST", "path" to url)
                 )
                 .contextWrite { it.put("startTime", LocalDateTime.now()) }
         }

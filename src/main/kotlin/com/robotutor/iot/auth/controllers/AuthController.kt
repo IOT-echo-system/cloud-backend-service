@@ -26,6 +26,14 @@ class AuthController(
         return tokenService.login(userDetails).map { TokenResponse(it.value, true) }
     }
 
+    @GetMapping("/logout")
+    fun logout(
+        @RequestHeader("authorization") token: String,
+        authenticationData: UserAuthenticationData
+    ): Mono<LogoutResponse> {
+        return tokenService.logout(token, authenticationData).map { LogoutResponse(true) }
+    }
+
     @GetMapping("/validate")
     fun validateToken(@RequestHeader("authorization") token: String = ""): Mono<ValidateTokenResponse> {
         return tokenService.validate(token)
@@ -52,9 +60,15 @@ class AuthController(
     @PostMapping("/update-token")
     fun resetPassword(
         @RequestBody @Validated updateTokenRequest: UpdateTokenRequest,
-        authenticationData: UserAuthenticationData
+        @RequestHeader("Authorization") token: String = ""
     ): Mono<TokenResponse> {
-        return tokenService.updateToken(updateTokenRequest, authenticationData.userId)
+        return tokenService.updateToken(updateTokenRequest, token)
             .map { TokenResponse(it.value, true) }
+    }
+
+    @GetMapping("/user-details")
+    fun userDetails(authenticationData: UserAuthenticationData): Mono<UserDetailsResponse> {
+        return userService.getUserByUserId(authenticationData.userId)
+            .map { UserDetailsResponse.from(it, authenticationData) }
     }
 }

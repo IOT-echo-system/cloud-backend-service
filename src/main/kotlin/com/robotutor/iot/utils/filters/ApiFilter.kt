@@ -2,14 +2,13 @@ package com.robotutor.iot.utils.filters
 
 import com.robotutor.iot.logging.logOnSuccess
 import com.robotutor.iot.logging.serializer.DefaultSerializer.serialize
-import com.robotutor.iot.utils.config.AppConfig
 import com.robotutor.iot.utils.exceptions.IOTError
 import com.robotutor.iot.utils.exceptions.UnAuthorizedException
-import com.robotutor.iot.utils.filters.views.UserAuthenticationResponseData
+import com.robotutor.iot.utils.gateway.AuthGateway
 import com.robotutor.iot.utils.models.UserAuthenticationData
 import com.robotutor.iot.utils.utils.createMono
 import com.robotutor.iot.utils.utils.createMonoError
-import com.robotutor.iot.webClient.WebClientWrapper
+import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.http.server.reactive.ServerHttpRequest
@@ -24,8 +23,7 @@ import java.time.LocalDateTime
 @Component
 class ApiFilter(
     private val routeValidator: RouteValidator,
-    private val webClient: WebClientWrapper,
-    private val appConfig: AppConfig
+    private val authGateway: AuthGateway
 ) : WebFilter {
     override fun filter(exchange: ServerWebExchange, chain: WebFilterChain): Mono<Void> {
         val startTime = LocalDateTime.now()
@@ -78,11 +76,7 @@ class ApiFilter(
 
     private fun authorizeUser(exchange: ServerWebExchange): Mono<UserAuthenticationData> {
         return if (routeValidator.isSecured(exchange.request)) {
-            webClient.get(
-                baseUrl = appConfig.authServiceBaseUrl,
-                path = "/auth/validate",
-                returnType = UserAuthenticationResponseData::class.java,
-            )
+            authGateway.validate(exchange.request.headers[HttpHeaders.AUTHORIZATION]?.get(0))
                 .map { userAuthenticationResponseData -> UserAuthenticationData.from(userAuthenticationResponseData) }
                 .contextWrite { it.put(ServerWebExchange::class.java, exchange) }
         } else {

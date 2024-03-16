@@ -16,6 +16,7 @@ import com.robotutor.iot.mqtt.services.MqttPublisher
 import com.robotutor.iot.utils.audit.auditOnError
 import com.robotutor.iot.utils.audit.auditOnSuccess
 import com.robotutor.iot.utils.exceptions.UnAuthorizedException
+import com.robotutor.iot.utils.models.UserAuthenticationData
 import com.robotutor.iot.utils.services.IdGeneratorService
 import com.robotutor.iot.utils.utils.createMonoError
 import org.springframework.stereotype.Service
@@ -106,20 +107,34 @@ class TokenService(
         }
     }
 
-    fun updateToken(updateTokenRequest: UpdateTokenRequest, userId: String): Mono<Token> {
-        return accountServiceGateway.isValidAccountAndRole(
-            userId,
-            updateTokenRequest.accountId,
-            updateTokenRequest.roleId
-        )
-            .flatMap {
-                generateToken(
-                    userId = userId,
-                    expiredAt = LocalDateTime.now().plusDays(7),
-                    otpId = null,
-                    accountId = updateTokenRequest.accountId,
+    fun updateToken(updateTokenRequest: UpdateTokenRequest, tokenString: String): Mono<Token> {
+        return tokenRepository.findByValueAndExpiredAtAfter(tokenString)
+            .flatMap { token ->
+                accountServiceGateway.isValidAccountAndRole(
+                    userId = token.userId,
+                    accountId = updateTokenRequest.projectId,
                     roleId = updateTokenRequest.roleId
                 )
+                    .flatMap {
+                        generateToken(
+                            userId = token.userId,
+                            expiredAt = token.expiredAt,
+                            otpId = null,
+                            accountId = updateTokenRequest.projectId,
+                            roleId = updateTokenRequest.roleId
+                        )
+                    }
             }
+    }
+
+    fun logout(token: String, userAuthenticationData: UserAuthenticationData): Mono<Token> {
+        return tokenRepository.findByValue(token)
+            .flatMap {
+                tokenRepository.save(it.setExpired())
+            }
+            .auditOnSuccess(mqttPublisher = mqttPublisher, event = AuditEvent.LOG_OUT)
+            .auditOnError(mqttPublisher = mqttPublisher, event = AuditEvent.LOG_OUT)
+            .logOnSuccess(message = "Successfully logged out user")
+            .logOnError(errorMessage = "Failed to log out user")
     }
 }

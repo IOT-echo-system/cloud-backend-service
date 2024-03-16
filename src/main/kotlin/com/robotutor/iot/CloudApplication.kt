@@ -3,9 +3,11 @@ package com.robotutor.iot
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.builder.SpringApplicationBuilder
 import org.springframework.boot.context.properties.ConfigurationPropertiesScan
+import org.springframework.web.reactive.config.EnableWebFlux
 
 @SpringBootApplication
 @ConfigurationPropertiesScan(basePackages = ["com.robotutor.iot"])
+@EnableWebFlux
 class CloudApplication {
     companion object {
         @JvmStatic

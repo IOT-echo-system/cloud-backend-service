@@ -13,6 +13,7 @@ import com.robotutor.iot.mqtt.services.MqttPublisher
 import com.robotutor.iot.utils.audit.auditOnError
 import com.robotutor.iot.utils.audit.auditOnSuccess
 import com.robotutor.iot.utils.exceptions.DataNotFoundException
+import com.robotutor.iot.utils.models.UserAuthenticationData
 import com.robotutor.iot.utils.services.IdGeneratorService
 import com.robotutor.iot.utils.utils.createMono
 import com.robotutor.iot.utils.utils.createMonoError
@@ -63,5 +64,13 @@ class AccountService(
                 }
             }
             .switchIfEmpty { createMonoError(DataNotFoundException(IOTError.IOT0201)) }
+    }
+
+    fun getAccountDetails(userAuthenticationData: UserAuthenticationData): Mono<Account> {
+        return accountRepository.findByAccountId(userAuthenticationData.accountId)
+            .map { account ->
+                val users = account.users.find { it.userId == userAuthenticationData.userId }
+                account.copy(users = listOf(users!!))
+            }
     }
 }

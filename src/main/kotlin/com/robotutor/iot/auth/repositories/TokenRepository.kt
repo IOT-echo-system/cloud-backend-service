@@ -10,4 +10,5 @@ import java.time.LocalDateTime
 @Repository
 interface TokenRepository :ReactiveCrudRepository<Token, TokenId> {
     fun findByValueAndExpiredAtAfter(token: String, expiredAtAfter: LocalDateTime = LocalDateTime.now()): Mono<Token>
+    fun findByValue(token: String) : Mono<Token>
 }

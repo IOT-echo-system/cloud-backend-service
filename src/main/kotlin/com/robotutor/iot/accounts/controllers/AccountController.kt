@@ -36,9 +36,20 @@ class AccountController(private val accountService: AccountService, private val 
             }
     }
 
+    @GetMapping("/account-details")
+    fun getAccountDetails(
+        userAuthenticationData: UserAuthenticationData
+    ): Mono<AccountWithRoles> {
+        return accountService.getAccountDetails(userAuthenticationData)
+            .flatMap { account ->
+                roleService.getRoles(account.users.first().roles)
+                    .map { roles -> AccountWithRoles.from(account, roles) }
+            }
+    }
+
     @PostMapping("/validate")
     fun isValidAccount(
-        @RequestBody accountValidationRequest: AccountValidationRequest,
+        @Validated @RequestBody accountValidationRequest: AccountValidationRequest,
         userAuthenticationData: UserAuthenticationData
     ): Mono<Map<String, Boolean>> {
         return accountService.isAccountExistsWithRole(accountValidationRequest, userAuthenticationData.userId)

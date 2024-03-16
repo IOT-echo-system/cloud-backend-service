@@ -2,10 +2,12 @@ package com.robotutor.iot.auth.controllers.view
 
 import com.robotutor.iot.auth.models.UserDetails
 import com.robotutor.iot.auth.models.UserId
+import com.robotutor.iot.utils.models.UserAuthenticationData
 import jakarta.validation.constraints.Email
 import jakarta.validation.constraints.NotBlank
 import jakarta.validation.constraints.Pattern
 import jakarta.validation.constraints.Size
+import java.time.LocalDateTime
 
 data class UserSignUpRequest(
     @field:NotBlank(message = "Name is required")
@@ -39,8 +41,8 @@ data class ResetPasswordRequest(
 
 
 data class UpdateTokenRequest(
-    @field:NotBlank(message = "AccountId should not be blank!")
-    val accountId: String,
+    @field:NotBlank(message = "ProjectId should not be blank!")
+    val projectId: String,
     @field:NotBlank(message = "RoleId should not be blank")
     val roleId: String
 )
@@ -55,6 +57,27 @@ data class UserSignUpResponse(val email: String, val userId: UserId, val name: S
 }
 
 data class TokenResponse(val token: String, val success: Boolean)
+data class LogoutResponse( val success: Boolean)
 data class ResetPasswordResponse(val success: Boolean)
 
 data class ValidateTokenResponse(val userId: UserId, val projectId: String, val roleId: String)
+
+data class UserDetailsResponse(
+    val userId: UserId,
+    val name: String,
+    val email: String,
+    val registeredAt: LocalDateTime,
+    val roleId: String
+) {
+    companion object {
+        fun from(userDetails: UserDetails, authenticationData: UserAuthenticationData): UserDetailsResponse {
+            return UserDetailsResponse(
+                userId = userDetails.userId,
+                name = userDetails.name,
+                email = userDetails.email,
+                registeredAt = userDetails.registeredAt,
+                roleId = authenticationData.roleId
+            )
+        }
+    }
+}

@@ -120,5 +120,9 @@ class UserService(
                 createMonoError(DataNotFoundException(IOTError.IOT0106))
             }
     }
+
+    fun getUserByUserId(userId: UserId): Mono<UserDetails> {
+        return userRepository.findByUserId(userId)
+    }
 }
 
