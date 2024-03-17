@@ -11,6 +11,7 @@ import java.time.LocalDateTime
 
 data class UserSignUpRequest(
     @field:NotBlank(message = "Name is required")
+    @field:Size(min = 4, max = 30, message = "Name should not be less than 4 char or more than 30 char")
     val name: String,
     @field:Email(message = "Email should be valid")
     val email: String,

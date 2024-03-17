@@ -14,11 +14,8 @@ open class BaseException(
         cause
     )
 
-    fun errorResponse(): Map<String, String> {
-        return mapOf(
-            "errorCode" to errorCode,
-            "message" to message,
-        )
+    fun errorResponse(): ErrorResponse {
+        return ErrorResponse(errorCode = errorCode, message = message)
     }
 
     fun toMap(): Map<String, Any> {
@@ -29,3 +26,5 @@ open class BaseException(
         )
     }
 }
+
+data class ErrorResponse(val errorCode: String, val message: String)
