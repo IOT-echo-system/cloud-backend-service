@@ -3,7 +3,6 @@ package com.robotutor.iot.accounts.controllers.views
 import com.robotutor.iot.accounts.models.Account
 import com.robotutor.iot.accounts.models.AccountId
 import com.robotutor.iot.accounts.models.Role
-import com.robotutor.iot.accounts.models.RoleId
 
 data class AccountWithRoles(val projectId: AccountId, val name: String, val roles: List<RoleView>) {
     companion object {
@@ -19,4 +18,3 @@ data class AccountWithRoles(val projectId: AccountId, val name: String, val role
     }
 }
 
-data class RoleView(val roleId: RoleId, val name: String)

@@ -1,9 +1,11 @@
 package com.robotutor.iot.accounts.controllers
 
 import com.robotutor.iot.accounts.controllers.views.AccountValidationRequest
+import com.robotutor.iot.accounts.controllers.views.AccountView
 import com.robotutor.iot.accounts.controllers.views.AccountWithRoles
 import com.robotutor.iot.accounts.controllers.views.AddAccountRequest
 import com.robotutor.iot.accounts.services.AccountService
+import com.robotutor.iot.accounts.services.PolicyService
 import com.robotutor.iot.accounts.services.RoleService
 import com.robotutor.iot.utils.models.UserAuthenticationData
 import org.springframework.validation.annotation.Validated
@@ -13,7 +15,11 @@ import reactor.core.publisher.Mono
 
 @RestController
 @RequestMapping("/accounts")
-class AccountController(private val accountService: AccountService, private val roleService: RoleService) {
+class AccountController(
+    private val accountService: AccountService,
+    private val roleService: RoleService,
+    private val policyService: PolicyService
+) {
 
     @GetMapping
     fun getAccounts(userAuthenticationData: UserAuthenticationData): Flux<AccountWithRoles> {
@@ -37,13 +43,17 @@ class AccountController(private val accountService: AccountService, private val 
     }
 
     @GetMapping("/account-details")
-    fun getAccountDetails(
-        userAuthenticationData: UserAuthenticationData
-    ): Mono<AccountWithRoles> {
+    fun getAccountDetails(userAuthenticationData: UserAuthenticationData): Mono<AccountView> {
         return accountService.getAccountDetails(userAuthenticationData)
             .flatMap { account ->
                 roleService.getRoles(account.users.first().roles)
-                    .map { roles -> AccountWithRoles.from(account, roles) }
+                    .flatMap { roles ->
+                        val role = roles.find { it.roleId == userAuthenticationData.roleId }!!
+                        policyService.getPolicies(role.policies)
+                            .map{ policies ->
+                                AccountView.from(account, roles, policies)
+                            }
+                    }
             }
     }
 

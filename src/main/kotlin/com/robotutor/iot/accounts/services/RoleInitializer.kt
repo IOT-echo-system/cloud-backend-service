@@ -8,32 +8,33 @@ import org.springframework.stereotype.Component
 import reactor.kotlin.core.publisher.switchIfEmpty
 
 @Component
-class RoleInitializer(private val roleService: RoleService) : ApplicationRunner {
+class RoleInitializer(private val roleService: RoleService, private val policyInitializer: PolicyInitializer) :
+    ApplicationRunner {
     override fun run(args: ApplicationArguments?) {
         val roles = listOf(
             Role(
                 roleId = "1".padStart(IdType.ROLE_ID.length, '0'),
                 name = "Owner",
                 createdBy = "System",
-                policies = listOf()
+                policies = listOf("1", "2", "3", "4").map { policyInitializer.getPolicyId(it) }
             ),
             Role(
                 roleId = "2".padStart(IdType.ROLE_ID.length, '0'),
                 name = "Admin",
                 createdBy = "System",
-                policies = listOf()
+                policies = listOf("1", "2", "3", "4").map { policyInitializer.getPolicyId(it) }
             ),
             Role(
                 roleId = "3".padStart(IdType.ROLE_ID.length, '0'),
                 name = "User",
                 createdBy = "System",
-                policies = listOf()
+                policies = listOf("1").map { policyInitializer.getPolicyId(it) }
             ),
         )
         roles.forEach { role ->
             roleService.getRoleByRoleId(role.roleId)
                 .switchIfEmpty {
-                    roleService.addRole(name = role.name, createdBy = role.createdBy)
+                    roleService.addRole(name = role.name, createdBy = role.createdBy, policies = role.policies)
                 }
                 .block()
         }

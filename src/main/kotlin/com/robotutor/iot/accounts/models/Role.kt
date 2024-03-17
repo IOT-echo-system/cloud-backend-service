@@ -22,8 +22,8 @@ data class Role(
     val createdAt: LocalDateTime = LocalDateTime.now()
 ) {
     companion object {
-        fun from(roleId: String, name: String, createdBy: String): Role {
-            return Role(roleId = roleId, name = name, createdBy = createdBy, policies = emptyList())
+        fun from(roleId: String, name: String, createdBy: String, policies: List<PolicyId>): Role {
+            return Role(roleId = roleId, name = name, createdBy = createdBy, policies = policies)
         }
     }
 }

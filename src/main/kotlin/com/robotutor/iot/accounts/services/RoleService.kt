@@ -1,6 +1,7 @@
 package com.robotutor.iot.accounts.services
 
 import com.robotutor.iot.accounts.models.IdType
+import com.robotutor.iot.accounts.models.PolicyId
 import com.robotutor.iot.accounts.models.Role
 import com.robotutor.iot.accounts.models.RoleId
 import com.robotutor.iot.accounts.repositories.RoleRepository
@@ -18,10 +19,10 @@ class RoleService(private val roleRepository: RoleRepository, private val idGene
         return roleRepository.findByRoleId(roleId)
     }
 
-    fun addRole(name: String, createdBy: String): Mono<Role> {
+    fun addRole(name: String, createdBy: String, policies: List<PolicyId>): Mono<Role> {
         return idGeneratorService.generateId(IdType.ROLE_ID)
             .flatMap { roleId ->
-                roleRepository.save(Role.from(roleId, name, createdBy))
+                roleRepository.save(Role.from(roleId, name, createdBy, policies))
             }
     }
 
