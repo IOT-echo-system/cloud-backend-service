@@ -37,7 +37,7 @@ class AccountService(
                     .auditOnSuccess(mqttPublisher, AuditEvent.CREATE_ACCOUNT, metaData, accountId = accountId)
                     .auditOnError(mqttPublisher, AuditEvent.CREATE_ACCOUNT, metaData, accountId = accountId)
                     .logOnSuccess(message = "Successfully created new Account", additionalDetails = metaData)
-                    .logOnError(errorMessage = "Successfully created new Account", additionalDetails = metaData)
+                    .logOnError(errorMessage = "Failed to create new Account", additionalDetails = metaData)
             }
     }
 

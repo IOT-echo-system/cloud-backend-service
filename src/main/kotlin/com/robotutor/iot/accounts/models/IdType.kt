@@ -7,4 +7,5 @@ enum class IdType(override val length: Int) : IdSequenceType {
     ACCOUNT_ID(10),
     ROLE_ID(5),
     POLICY_ID(4),
+    BOARD_ID(12),
 }

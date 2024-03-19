@@ -28,5 +28,6 @@ enum class AuditEvent {
     RESET_PASSWORD,
     SEND_EMAIL,
     CREATE_ACCOUNT,
-    LOG_OUT
+    LOG_OUT,
+    CREATE_BOARD
 }

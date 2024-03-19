@@ -15,6 +15,7 @@ data class Policy(
     var id: ObjectId? = null,
     @Indexed(unique = true)
     val policyId: PolicyId,
+    @Indexed(unique = true)
     val name: String,
 )
 

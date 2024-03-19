@@ -1,6 +1,6 @@
 package com.robotutor.iot.utils.models
 
-import com.robotutor.iot.utils.filters.views.UserAuthenticationResponseData
+import com.robotutor.iot.utils.gateway.views.UserAuthenticationResponseData
 
 interface IAuthenticationData
 

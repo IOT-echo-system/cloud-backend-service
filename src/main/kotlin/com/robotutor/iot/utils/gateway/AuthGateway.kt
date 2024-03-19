@@ -1,7 +1,7 @@
 package com.robotutor.iot.utils.gateway
 
 import com.robotutor.iot.auth.controllers.AuthController
-import com.robotutor.iot.utils.filters.views.UserAuthenticationResponseData
+import com.robotutor.iot.utils.gateway.views.UserAuthenticationResponseData
 import org.springframework.stereotype.Component
 import reactor.core.publisher.Mono
 

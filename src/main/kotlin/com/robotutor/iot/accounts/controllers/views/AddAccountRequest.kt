@@ -7,7 +7,7 @@ import jakarta.validation.constraints.Size
 
 data class AddAccountRequest(
     @field:NotBlank(message = "Project name should not be blank")
-    @field:Size(min = 4, max = 60, message = "Project name should not be less than 4 char or more than 30 char")
+    @field:Size(min = 4, max = 30, message = "Project name should not be less than 4 char or more than 30 char")
     val name: String
 )
 

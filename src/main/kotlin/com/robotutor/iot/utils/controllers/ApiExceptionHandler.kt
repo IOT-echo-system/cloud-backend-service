@@ -31,6 +31,11 @@ class ApiExceptionHandler {
         return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS).body(ex.errorResponse())
     }
 
+    @ExceptionHandler(AccessDeniedException::class)
+    fun handleException(ex: AccessDeniedException): ResponseEntity<ErrorResponse> {
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(ex.errorResponse())
+    }
+
     @ExceptionHandler(WebExchangeBindException::class)
     fun handleValidationException(ex: WebExchangeBindException): ResponseEntity<ErrorResponse> {
         val errors = ex.bindingResult.fieldErrors.map { it.defaultMessage!! }
