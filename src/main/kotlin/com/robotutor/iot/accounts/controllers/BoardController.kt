@@ -6,10 +6,8 @@ import com.robotutor.iot.accounts.services.BoardService
 import com.robotutor.iot.utils.filters.annotations.RequirePolicy
 import com.robotutor.iot.utils.models.UserAuthenticationData
 import org.springframework.validation.annotation.Validated
-import org.springframework.web.bind.annotation.PostMapping
-import org.springframework.web.bind.annotation.RequestBody
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.bind.annotation.*
+import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 
 @RestController
@@ -18,14 +16,11 @@ class BoardController(
     private val boardService: BoardService,
 ) {
 
-//    @GetMapping
-//    fun getAccounts(userAuthenticationData: UserAuthenticationData): Flux<AccountWithRoles> {
-//        return accountService.getAccounts(userAuthenticationData.userId)
-//            .flatMap { account ->
-//                roleService.getRoles(account.users.first().roles)
-//                    .map { roles -> AccountWithRoles.from(account, roles) }
-//            }
-//    }
+    @RequirePolicy("BOARD_GET")
+    @GetMapping
+    fun getBoards(userAuthenticationData: UserAuthenticationData): Flux<BoardView> {
+        return boardService.getBoards(userAuthenticationData).map { board -> BoardView.from(board) }
+    }
 
     @RequirePolicy("BOARD_CREATE")
     @PostMapping

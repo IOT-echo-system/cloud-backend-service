@@ -13,6 +13,7 @@ import com.robotutor.iot.utils.audit.auditOnSuccess
 import com.robotutor.iot.utils.models.UserAuthenticationData
 import com.robotutor.iot.utils.services.IdGeneratorService
 import org.springframework.stereotype.Service
+import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 
 @Service
@@ -30,6 +31,10 @@ class BoardService(
                     .logOnSuccess(message = "Successfully created new Board")
                     .logOnError(errorMessage = "Failed to create new Account")
             }
+    }
+
+    fun getBoards(userAuthenticationData: UserAuthenticationData): Flux<Board> {
+        return boardRepository.findAllByAccountId(userAuthenticationData.accountId)
     }
 
 }
