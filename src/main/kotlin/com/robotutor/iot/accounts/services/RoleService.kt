@@ -7,12 +7,13 @@ import com.robotutor.iot.accounts.models.RoleId
 import com.robotutor.iot.accounts.repositories.RoleRepository
 import com.robotutor.iot.utils.services.IdGeneratorService
 import org.springframework.stereotype.Service
+import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 
 @Service
 class RoleService(private val roleRepository: RoleRepository, private val idGeneratorService: IdGeneratorService) {
-    fun getRoles(roles: List<RoleId>): Mono<List<Role>> {
-        return roleRepository.findAllByRoleIdIn(roles).collectList()
+    fun getRoles(roles: List<RoleId>): Flux<Role> {
+        return roleRepository.findAllByRoleIdIn(roles)
     }
 
     fun getRoleByRoleId(roleId: RoleId): Mono<Role> {

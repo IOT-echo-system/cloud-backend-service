@@ -36,6 +36,7 @@ app:
       - "/auth/verify-otp"
     open-api-end-points-for-account:
       - "/accounts"
+      - "/roles"
       - "/accounts/validate"
       - "/auth/update-token"
 

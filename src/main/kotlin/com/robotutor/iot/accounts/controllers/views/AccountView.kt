@@ -5,16 +5,14 @@ import com.robotutor.iot.accounts.models.*
 data class AccountView(
     val projectId: AccountId,
     val name: String,
-    val roles: List<RoleView>,
-    val policies: List<PolicyView>
+    val user: User,
 ) {
     companion object {
-        fun from(account: Account, roles: List<Role>, policies: List<Policy>): AccountView {
+        fun from(account: Account): AccountView {
             return AccountView(
                 projectId = account.accountId,
                 name = account.name,
-                roles = roles.map { RoleView.from(it) },
-                policies = policies.map { PolicyView.from(it) }
+                user = account.users.first(),
             )
         }
     }

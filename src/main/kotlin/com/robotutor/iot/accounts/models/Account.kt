@@ -43,6 +43,6 @@ data class Account(
     }
 }
 
-data class User(val userId: String, val roles: List<RoleId>)
+data class User(val userId: String, val roleIds: List<RoleId>)
 
 typealias AccountId = String

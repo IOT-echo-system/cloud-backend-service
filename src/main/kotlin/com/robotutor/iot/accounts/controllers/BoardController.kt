@@ -12,9 +12,7 @@ import reactor.core.publisher.Mono
 
 @RestController
 @RequestMapping("/boards")
-class BoardController(
-    private val boardService: BoardService,
-) {
+class BoardController(private val boardService: BoardService) {
 
     @RequirePolicy("BOARD_GET")
     @GetMapping
@@ -30,27 +28,4 @@ class BoardController(
     ): Mono<BoardView> {
         return boardService.addNewBoard(addBoardRequest, userAuthenticationData).map { board -> BoardView.from(board) }
     }
-//
-//    @GetMapping("/account-details")
-//    fun getAccountDetails(userAuthenticationData: UserAuthenticationData): Mono<AccountView> {
-//        return accountService.getAccountDetails(userAuthenticationData)
-//            .flatMap { account ->
-//                roleService.getRoles(account.users.first().roles)
-//                    .flatMap { roles ->
-//                        val role = roles.find { it.roleId == userAuthenticationData.roleId }!!
-//                        policyService.getPolicies(role.policies)
-//                            .map{ policies ->
-//                                AccountView.from(account, roles, policies)
-//                            }
-//                    }
-//            }
-//    }
-//
-//    @PostMapping("/validate")
-//    fun isValidAccount(
-//        @Validated @RequestBody accountValidationRequest: AccountValidationRequest,
-//        userAuthenticationData: UserAuthenticationData
-//    ): Mono<Map<String, Boolean>> {
-//        return accountService.isAccountExistsWithRole(accountValidationRequest, userAuthenticationData.userId)
-//    }
 }

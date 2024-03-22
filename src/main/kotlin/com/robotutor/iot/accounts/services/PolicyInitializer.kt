@@ -15,7 +15,11 @@ class PolicyInitializer(private val policyRepository: PolicyRepository) : Applic
             Policy(policyId = getPolicyId("1"), name = "BOARD_GET"),
             Policy(policyId = getPolicyId("2"), name = "BOARD_CREATE"),
             Policy(policyId = getPolicyId("3"), name = "BOARD_UPDATE"),
-            Policy(policyId = getPolicyId("4"), name = "BOARD_DELETE")
+            Policy(policyId = getPolicyId("4"), name = "BOARD_DELETE"),
+            Policy(policyId = getPolicyId("5"), name = "DEVICE_GET"),
+            Policy(policyId = getPolicyId("6"), name = "DEVICE_CREATE"),
+            Policy(policyId = getPolicyId("7"), name = "DEVICE_UPDATE"),
+            Policy(policyId = getPolicyId("8"), name = "DEVICE_DELETE")
         )
         policies.forEach { policy ->
             policyRepository.findByPolicyId(policy.policyId)

@@ -56,7 +56,7 @@ class AccountService(
         return accountRepository.findByAccountId(accountValidationRequest.accountId)
             .flatMap { account ->
                 val user = account.users.find { it.userId == userId }
-                val role = user?.roles?.find { it == accountValidationRequest.roleId }
+                val role = user?.roleIds?.find { it == accountValidationRequest.roleId }
                 if (role.isNullOrBlank()) {
                     createMonoError(DataNotFoundException(IOTError.IOT0201))
                 } else {
