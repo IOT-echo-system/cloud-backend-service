@@ -1,7 +1,9 @@
 package com.robotutor.iot.accounts.services
 
 import com.robotutor.iot.accounts.controllers.views.AddBoardRequest
+import com.robotutor.iot.accounts.models.AccountId
 import com.robotutor.iot.accounts.models.Board
+import com.robotutor.iot.accounts.models.BoardId
 import com.robotutor.iot.accounts.models.IdType
 import com.robotutor.iot.accounts.repositories.BoardRepository
 import com.robotutor.iot.logging.logOnError
@@ -29,12 +31,23 @@ class BoardService(
                     .auditOnSuccess(mqttPublisher, AuditEvent.CREATE_BOARD)
                     .auditOnError(mqttPublisher, AuditEvent.CREATE_BOARD)
                     .logOnSuccess(message = "Successfully created new Board")
-                    .logOnError(errorMessage = "Failed to create new Account")
+                    .logOnError(errorMessage = "Failed to create new board")
             }
     }
 
     fun getBoards(userAuthenticationData: UserAuthenticationData): Flux<Board> {
         return boardRepository.findAllByAccountId(userAuthenticationData.accountId)
+    }
+
+    fun updateBoardName(addBoardRequest: AddBoardRequest, boardId: BoardId, accountId: AccountId): Mono<Board> {
+        return boardRepository.findByAccountIdAndBoardId(accountId, boardId)
+            .flatMap { board ->
+                boardRepository.save(board.updateName(addBoardRequest.name))
+            }
+            .auditOnSuccess(mqttPublisher, AuditEvent.UPDATE_BOARD)
+            .auditOnError(mqttPublisher, AuditEvent.UPDATE_BOARD)
+            .logOnSuccess(message = "Successfully updated board name")
+            .logOnError(errorMessage = "Failed to update board name")
     }
 
 }

@@ -29,5 +29,6 @@ enum class AuditEvent {
     SEND_EMAIL,
     CREATE_ACCOUNT,
     LOG_OUT,
-    CREATE_BOARD
+    CREATE_BOARD,
+    UPDATE_BOARD
 }

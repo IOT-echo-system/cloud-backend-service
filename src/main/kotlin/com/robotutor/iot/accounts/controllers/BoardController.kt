@@ -2,6 +2,7 @@ package com.robotutor.iot.accounts.controllers
 
 import com.robotutor.iot.accounts.controllers.views.AddBoardRequest
 import com.robotutor.iot.accounts.controllers.views.BoardView
+import com.robotutor.iot.accounts.models.BoardId
 import com.robotutor.iot.accounts.services.BoardService
 import com.robotutor.iot.utils.filters.annotations.RequirePolicy
 import com.robotutor.iot.utils.models.UserAuthenticationData
@@ -27,5 +28,15 @@ class BoardController(private val boardService: BoardService) {
         userAuthenticationData: UserAuthenticationData
     ): Mono<BoardView> {
         return boardService.addNewBoard(addBoardRequest, userAuthenticationData).map { board -> BoardView.from(board) }
+    }
+
+    @RequirePolicy("BOARD_UPDATE")
+    @PutMapping("/{boardId}/name")
+    fun updateBoardName(
+        @RequestBody @Validated addBoardRequest: AddBoardRequest,
+        @PathVariable boardId: BoardId,
+        userAuthenticationData: UserAuthenticationData
+    ): Mono<BoardView> {
+        return boardService.updateBoardName(addBoardRequest, boardId, userAuthenticationData.accountId).map { board -> BoardView.from(board) }
     }
 }

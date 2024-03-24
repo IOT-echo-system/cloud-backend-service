@@ -19,10 +19,15 @@ data class Board(
     @Indexed(unique = true)
     val boardId: BoardId,
     val accountId: AccountId,
-    val name: String,
+    var name: String,
     var status: BoardStatus = BoardStatus.UNHEALTHY,
     val createdAt: LocalDateTime = LocalDateTime.now()
 ) {
+    fun updateName(name: String): Board {
+        this.name = name
+        return this
+    }
+
     companion object {
         fun from(
             boardId: String,
