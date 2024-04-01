@@ -1,11 +1,9 @@
-package com.robotutor.iot.accounts.models
+package com.robotutor.iot.widgets.modals
 
 import com.robotutor.iot.utils.models.IdSequenceType
 
 
 enum class IdType(override val length: Int) : IdSequenceType {
-    ACCOUNT_ID(6),
-    ROLE_ID(5),
-    POLICY_ID(6),
-    BOARD_ID(12),
+    WIDGET_ID(8),
+    INVOICE_ID(8)
 }

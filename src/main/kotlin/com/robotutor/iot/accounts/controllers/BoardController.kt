@@ -37,6 +37,11 @@ class BoardController(private val boardService: BoardService) {
         @PathVariable boardId: BoardId,
         userAuthenticationData: UserAuthenticationData
     ): Mono<BoardView> {
-        return boardService.updateBoardName(addBoardRequest, boardId, userAuthenticationData.accountId).map { board -> BoardView.from(board) }
+        return boardService.updateBoardName(addBoardRequest, boardId, userAuthenticationData.accountId)
+            .map { board -> BoardView.from(board) }
+    }
+
+    fun isValidBoardId(userAuthenticationData: UserAuthenticationData, boardId: BoardId): Mono<Boolean> {
+        return boardService.isValidBoard(userAuthenticationData, boardId).map { true }
     }
 }

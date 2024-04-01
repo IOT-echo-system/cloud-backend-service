@@ -30,5 +30,6 @@ enum class AuditEvent {
     CREATE_ACCOUNT,
     LOG_OUT,
     CREATE_BOARD,
-    UPDATE_BOARD
+    UPDATE_BOARD,
+    ADD_WIDGET
 }

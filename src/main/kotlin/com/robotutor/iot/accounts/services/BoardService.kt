@@ -50,4 +50,8 @@ class BoardService(
             .logOnError(errorMessage = "Failed to update board name")
     }
 
+    fun isValidBoard(userAuthenticationData: UserAuthenticationData, boardId: BoardId): Mono<Board> {
+        return boardRepository.findByAccountIdAndBoardId(userAuthenticationData.accountId, boardId)
+    }
+
 }
