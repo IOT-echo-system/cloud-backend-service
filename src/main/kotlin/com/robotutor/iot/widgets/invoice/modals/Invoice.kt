@@ -22,6 +22,8 @@ data class Invoice(
     @Indexed(unique = true)
     val widgetId: WidgetId,
     val boardId: String,
+    val accountId: String,
+    var title: String = "Invoice",
     val widgetType: WidgetType = WidgetType.INVOICE,
     val seed: List<InvoiceSeedItem> = emptyList(),
     val cart: List<CartItem> = emptyList(),
@@ -31,9 +33,14 @@ data class Invoice(
     @LastModifiedDate
     val lastModifiedDate: LocalDateTime = LocalDateTime.now(),
 ) {
+    fun updateTitle(title: String): Invoice {
+        this.title = title
+        return this
+    }
+
     companion object {
-        fun from(widgetId: String, boardId: String): Invoice {
-            return Invoice(widgetId = widgetId, boardId = boardId)
+        fun from(widgetId: String, boardId: String, accountId: String): Invoice {
+            return Invoice(widgetId = widgetId, boardId = boardId, accountId = accountId)
         }
     }
 }

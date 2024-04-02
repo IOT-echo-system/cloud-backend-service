@@ -20,10 +20,14 @@ class PolicyInitializer(private val policyRepository: PolicyRepository) : Applic
             Policy(policyId = getPolicyId("6"), name = "DEVICE_CREATE"),
             Policy(policyId = getPolicyId("7"), name = "DEVICE_UPDATE"),
             Policy(policyId = getPolicyId("8"), name = "DEVICE_DELETE"),
-            Policy(policyId = getPolicyId("9"), name = "WIDGET_INVOICE_GET"),
-            Policy(policyId = getPolicyId("10"), name = "WIDGET_INVOICE_CREATE"),
-            Policy(policyId = getPolicyId("11"), name = "WIDGET_INVOICE_UPDATE"),
-            Policy(policyId = getPolicyId("12"), name = "WIDGET_INVOICE_DELETE")
+            Policy(policyId = getPolicyId("9"), name = "WIDGET_GET"),
+            Policy(policyId = getPolicyId("10"), name = "WIDGET_CREATE"),
+            Policy(policyId = getPolicyId("11"), name = "WIDGET_UPDATE"),
+            Policy(policyId = getPolicyId("12"), name = "WIDGET_DELETE"),
+            Policy(policyId = getPolicyId("13"), name = "WIDGET_INVOICE_GET"),
+            Policy(policyId = getPolicyId("14"), name = "WIDGET_INVOICE_CREATE"),
+            Policy(policyId = getPolicyId("15"), name = "WIDGET_INVOICE_UPDATE"),
+            Policy(policyId = getPolicyId("16"), name = "WIDGET_INVOICE_DELETE")
         )
         policies.forEach { policy ->
             policyRepository.findByPolicyId(policy.policyId)

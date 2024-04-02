@@ -3,11 +3,13 @@ package com.robotutor.iot.widgets.invoice.controllers
 import com.robotutor.iot.utils.filters.annotations.RequirePolicy
 import com.robotutor.iot.utils.models.BoardData
 import com.robotutor.iot.utils.models.UserAuthenticationData
-import com.robotutor.iot.widgets.invoice.modals.Invoice
+import com.robotutor.iot.widgets.invoice.controllers.views.InvoiceTitleRequest
+import com.robotutor.iot.widgets.invoice.controllers.views.InvoiceView
 import com.robotutor.iot.widgets.invoice.services.InvoiceService
-import org.springframework.web.bind.annotation.PostMapping
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RestController
+import com.robotutor.iot.widgets.modals.WidgetId
+import org.springframework.validation.annotation.Validated
+import org.springframework.web.bind.annotation.*
+import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 
 @RestController
@@ -16,7 +18,26 @@ class InvoiceController(private val invoiceService: InvoiceService) {
 
     @RequirePolicy("WIDGET_INVOICE_CREATE")
     @PostMapping
-    fun addInvoice(userAuthenticationData: UserAuthenticationData, boardData: BoardData): Mono<Invoice> {
-        return invoiceService.addInvoice(boardData)
+    fun addInvoice(boardData: BoardData): Mono<InvoiceView> {
+        return invoiceService.addInvoice(boardData).map { InvoiceView.form(it) }
+    }
+
+    @RequirePolicy("WIDGET_INVOICE_GET")
+    @GetMapping
+    fun getInvoice(
+        userAuthenticationData: UserAuthenticationData,
+        @RequestParam widgetIds: List<WidgetId>
+    ): Flux<InvoiceView> {
+        return invoiceService.getInvoice(userAuthenticationData, widgetIds).map { InvoiceView.form(it) }
+    }
+
+    @RequirePolicy("WIDGET_INVOICE_UPDATE")
+    @PutMapping("/{widgetId}/title")
+    fun updateInvoiceTitle(
+        @PathVariable widgetId: String,
+        @Validated @RequestBody invoiceTitleRequest: InvoiceTitleRequest,
+        boardData: BoardData
+    ): Mono<InvoiceView> {
+        return invoiceService.updateInvoiceTitle(widgetId, boardData, invoiceTitleRequest).map { InvoiceView.form(it) }
     }
 }

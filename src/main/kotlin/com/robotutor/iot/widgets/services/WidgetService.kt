@@ -7,6 +7,7 @@ import com.robotutor.iot.widgets.modals.WidgetId
 import com.robotutor.iot.widgets.modals.WidgetType
 import com.robotutor.iot.widgets.repositories.WidgetRepository
 import org.springframework.stereotype.Service
+import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 
 @Service
@@ -32,6 +33,10 @@ class WidgetService(
                     )
                 )
             }
+    }
+
+    fun getWidgets(boardIds: List<String>): Flux<Widget> {
+        return widgetRepository.findAllByBoardIdIn(boardIds)
     }
 
 }

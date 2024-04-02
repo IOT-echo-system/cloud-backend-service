@@ -16,19 +16,53 @@ class RoleInitializer(private val roleService: RoleService, private val policyIn
                 roleId = "1".padStart(IdType.ROLE_ID.length, '0'),
                 name = "Owner",
                 createdBy = "System",
-                policies = listOf("1", "2", "3", "4", "5", "6", "7", "8").map { policyInitializer.getPolicyId(it) }
+                policies = listOf(
+                    "1",
+                    "2",
+                    "3",
+                    "4",
+                    "5",
+                    "6",
+                    "7",
+                    "8",
+                    "9",
+                    "10",
+                    "11",
+                    "12",
+                    "13",
+                    "14",
+                    "15",
+                    "16"
+                ).map { policyInitializer.getPolicyId(it) }
             ),
             Role(
                 roleId = "2".padStart(IdType.ROLE_ID.length, '0'),
                 name = "Admin",
                 createdBy = "System",
-                policies = listOf("1", "2", "3", "4", "5", "6", "7", "8").map { policyInitializer.getPolicyId(it) }
+                policies = listOf(
+                    "1",
+                    "2",
+                    "3",
+                    "4",
+                    "5",
+                    "6",
+                    "7",
+                    "8",
+                    "9",
+                    "10",
+                    "11",
+                    "12",
+                    "13",
+                    "14",
+                    "15",
+                    "16"
+                ).map { policyInitializer.getPolicyId(it) }
             ),
             Role(
                 roleId = "3".padStart(IdType.ROLE_ID.length, '0'),
                 name = "User",
                 createdBy = "System",
-                policies = listOf("1", "5").map { policyInitializer.getPolicyId(it) }
+                policies = listOf("1", "5", "9", "13").map { policyInitializer.getPolicyId(it) }
             ),
         )
         roles.forEach { role ->
