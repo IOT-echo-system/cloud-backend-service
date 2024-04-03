@@ -26,6 +26,11 @@ class ApiExceptionHandler {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.errorResponse())
     }
 
+    @ExceptionHandler(DuplicateDataException::class)
+    fun handleDuplicateDataException(ex: DuplicateDataException): ResponseEntity<ErrorResponse> {
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(ex.errorResponse())
+    }
+
     @ExceptionHandler(TooManyRequestsException::class)
     fun handleException(ex: TooManyRequestsException): ResponseEntity<ErrorResponse> {
         return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS).body(ex.errorResponse())

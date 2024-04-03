@@ -10,7 +10,9 @@ import com.robotutor.iot.utils.models.BoardData
 import com.robotutor.iot.utils.models.UserAuthenticationData
 import com.robotutor.iot.utils.services.IdGeneratorService
 import com.robotutor.iot.widgets.invoice.controllers.views.InvoiceTitleRequest
+import com.robotutor.iot.widgets.invoice.controllers.views.SeedItemRequest
 import com.robotutor.iot.widgets.invoice.modals.Invoice
+import com.robotutor.iot.widgets.invoice.modals.InvoiceSeedItem
 import com.robotutor.iot.widgets.invoice.repositories.InvoiceRepository
 import com.robotutor.iot.widgets.modals.IdType
 import com.robotutor.iot.widgets.modals.WidgetId
@@ -63,6 +65,25 @@ class InvoiceService(
                     .auditOnError(mqttPublisher, AuditEvent.UPDATE_WIDGET_TITLE)
                     .logOnSuccess(message = "Successfully updated invoice widget title")
                     .logOnError(errorMessage = "Failed to update invoice widget title")
+            }
+    }
+
+    fun getSeedData(widgetId: WidgetId, boardData: BoardData): Mono<List<InvoiceSeedItem>> {
+        return invoiceRepository.findByWidgetIdAndBoardId(widgetId, boardData.boardId)
+            .map { it.seed }
+    }
+
+    fun addSeedData(widgetId: WidgetId, boardData: BoardData, seedItemRequest: SeedItemRequest): Mono<InvoiceSeedItem> {
+        return invoiceRepository.findByWidgetIdAndBoardId(widgetId, boardData.boardId)
+            .flatMap {
+                invoiceRepository.save(it.addSeedItem(seedItemRequest))
+            }
+            .auditOnSuccess(mqttPublisher, AuditEvent.ADD_INVOICE_WIDGET_SEED)
+            .auditOnError(mqttPublisher, AuditEvent.ADD_INVOICE_WIDGET_SEED)
+            .logOnSuccess(message = "Successfully added invoice seed item")
+            .logOnError(errorMessage = "Failed to add invoice seed item")
+            .map {
+                it.getSeedItem(seedItemRequest.code)
             }
     }
 }

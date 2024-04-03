@@ -32,7 +32,8 @@ class RoleInitializer(private val roleService: RoleService, private val policyIn
                     "13",
                     "14",
                     "15",
-                    "16"
+                    "16",
+                    "17"
                 ).map { policyInitializer.getPolicyId(it) }
             ),
             Role(
