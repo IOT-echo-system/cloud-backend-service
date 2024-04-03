@@ -71,4 +71,20 @@ class AuthController(
         return userService.getUserByUserId(authenticationData.userId)
             .map { UserDetailsResponse.from(it, authenticationData) }
     }
+
+    @GetMapping("/boards/{boardId}/secret-key")
+    fun getBoardSecretKey(
+        @PathVariable boardId: String,
+        authenticationData: UserAuthenticationData
+    ): Mono<TokenSecretKeyResponse> {
+        return tokenService.generateTokenForBoard(boardId, authenticationData).map { TokenSecretKeyResponse(it.value) }
+    }
+
+    @PutMapping("/boards/{boardId}/secret-key")
+    fun updateBoardSecretKey(
+        @PathVariable boardId: String,
+        authenticationData: UserAuthenticationData
+    ): Mono<TokenSecretKeyResponse> {
+        return tokenService.updateTokenForBoard(boardId, authenticationData).map { TokenSecretKeyResponse(it.value) }
+    }
 }

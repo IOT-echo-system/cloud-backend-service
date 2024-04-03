@@ -82,8 +82,23 @@ class InvoiceService(
             .auditOnError(mqttPublisher, AuditEvent.ADD_INVOICE_WIDGET_SEED)
             .logOnSuccess(message = "Successfully added invoice seed item")
             .logOnError(errorMessage = "Failed to add invoice seed item")
-            .map {
-                it.getSeedItem(seedItemRequest.code)
+            .map { it.getSeedItem(seedItemRequest.code) }
+    }
+
+    fun updateSeedData(
+        widgetId: WidgetId,
+        seedCode: String,
+        seedItemRequest: SeedItemRequest,
+        boardData: BoardData
+    ): Mono<InvoiceSeedItem> {
+        return invoiceRepository.findByWidgetIdAndBoardId(widgetId, boardData.boardId)
+            .flatMap {
+                invoiceRepository.save(it.updateSeedItem(seedCode, seedItemRequest))
             }
+            .auditOnSuccess(mqttPublisher, AuditEvent.UPDATE_INVOICE_WIDGET_SEED)
+            .auditOnError(mqttPublisher, AuditEvent.UPDATE_INVOICE_WIDGET_SEED)
+            .logOnSuccess(message = "Successfully updated invoice seed item")
+            .logOnError(errorMessage = "Failed to update invoice seed item")
+            .map { it.getSeedItem(seedItemRequest.code) }
     }
 }

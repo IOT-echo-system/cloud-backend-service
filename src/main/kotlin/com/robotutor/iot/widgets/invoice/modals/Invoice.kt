@@ -58,6 +58,18 @@ data class Invoice(
         return seedItem
     }
 
+    fun updateSeedItem(seedCode: String, seedItemRequest: SeedItemRequest): Invoice {
+        val index = this.seed.indexOfFirst { it.code == seedCode }
+        if (index == -1) {
+            throw DataNotFoundException(IOTError.IOT0502)
+        }
+        if (this.seed.any { it.code == seedItemRequest.code }) {
+            throw DuplicateDataException(IOTError.IOT0501)
+        }
+        this.seed[index] = InvoiceSeedItem.from(seedItemRequest)
+        return this
+    }
+
     companion object {
         fun from(widgetId: String, boardId: String, accountId: String): Invoice {
             return Invoice(widgetId = widgetId, boardId = boardId, accountId = accountId)

@@ -41,7 +41,13 @@ class TokenService(
 
     fun validate(token: String): Mono<ValidateTokenResponse> {
         return tokenRepository.findByValueAndExpiredAtAfter(token)
-            .map { ValidateTokenResponse(userId = it.userId, projectId = it.accountId ?: "", roleId = it.roleId ?: "") }
+            .map {
+                ValidateTokenResponse(
+                    userId = it.userId!!,
+                    projectId = it.accountId ?: "",
+                    roleId = it.roleId ?: ""
+                )
+            }
             .switchIfEmpty {
                 createMonoError(UnAuthorizedException(IOTError.IOT0103))
             }
@@ -50,11 +56,12 @@ class TokenService(
     }
 
     fun generateToken(
-        userId: UserId,
+        userId: UserId? = null,
         expiredAt: LocalDateTime,
         otpId: OtpId? = null,
         accountId: String? = null,
-        roleId: String? = null
+        roleId: String? = null,
+        boardId: String? = null
     ): Mono<Token> {
         return idGeneratorService.generateId(IdType.TOKEN_ID)
             .flatMap { tokenId ->
@@ -65,7 +72,8 @@ class TokenService(
                         expiredAt = expiredAt,
                         otpId = otpId,
                         accountId = accountId,
-                        roleId = roleId
+                        roleId = roleId,
+                        boardId = boardId
                     )
                 )
                     .auditOnSuccess(
@@ -97,10 +105,10 @@ class TokenService(
 
     private fun resetPassword(token: Token, resetPasswordRequest: ResetPasswordRequest): Mono<UserDetails> {
         return if (token.otpId != null) {
-            userService.resetPassword(token.userId, resetPasswordRequest.password)
+            userService.resetPassword(token.userId!!, resetPasswordRequest.password)
         } else {
             userService.resetPassword(
-                token.userId,
+                token.userId!!,
                 resetPasswordRequest.currentPassword ?: "",
                 resetPasswordRequest.password
             )
@@ -111,7 +119,7 @@ class TokenService(
         return tokenRepository.findByValueAndExpiredAtAfter(tokenString)
             .flatMap { token ->
                 accountServiceGateway.isValidAccountAndRole(
-                    userId = token.userId,
+                    userId = token.userId!!,
                     accountId = updateTokenRequest.projectId,
                     roleId = updateTokenRequest.roleId
                 )
@@ -136,5 +144,27 @@ class TokenService(
             .auditOnError(mqttPublisher = mqttPublisher, event = AuditEvent.LOG_OUT)
             .logOnSuccess(message = "Successfully logged out user")
             .logOnError(errorMessage = "Failed to log out user")
+    }
+
+    fun generateTokenForBoard(boardId: String, authenticationData: UserAuthenticationData): Mono<Token> {
+        return tokenRepository.findByBoardIdAndExpiredAtAfter(boardId)
+            .switchIfEmpty {
+                accountServiceGateway.isValidBoard(boardId, authenticationData)
+                    .flatMap {
+                        generateToken(
+                            expiredAt = LocalDateTime.now().plusYears(100),
+                            accountId = authenticationData.accountId,
+                            roleId = "00004",
+                            boardId = boardId
+                        )
+                    }
+            }
+    }
+
+    fun updateTokenForBoard(boardId: String, authenticationData: UserAuthenticationData): Mono<Token> {
+        return tokenRepository.deleteByBoardId(boardId)
+            .flatMap {
+                generateTokenForBoard(boardId, authenticationData)
+            }
     }
 }

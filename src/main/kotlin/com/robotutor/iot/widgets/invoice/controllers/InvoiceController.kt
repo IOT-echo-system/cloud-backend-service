@@ -63,4 +63,16 @@ class InvoiceController(private val invoiceService: InvoiceService) {
     ): Mono<InvoiceSeedDataView> {
         return invoiceService.addSeedData(widgetId, boardData, seedItemRequest).map { InvoiceSeedDataView.from(it) }
     }
+
+    @RequirePolicy("WIDGET_INVOICE_SEED_UPDATE")
+    @PutMapping("/{widgetId}/seed/{seedCode}")
+    fun updateSeedData(
+        @PathVariable widgetId: WidgetId,
+        @PathVariable seedCode: String,
+        @Validated @RequestBody seedItemRequest: SeedItemRequest,
+        boardData: BoardData
+    ): Mono<InvoiceSeedDataView> {
+        return invoiceService.updateSeedData(widgetId, seedCode, seedItemRequest, boardData)
+            .map { InvoiceSeedDataView.from(it) }
+    }
 }

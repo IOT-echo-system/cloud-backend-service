@@ -20,33 +20,38 @@ data class Token(
     @Indexed(name = "sessionExpiryIndex", expireAfterSeconds = 604800)
     val createdAt: LocalDateTime = LocalDateTime.now(),
     var expiredAt: LocalDateTime,
-    val userId: UserId,
-    val otpId: OtpId?,
+    val userId: UserId? = null,
+    val otpId: OtpId? = null,
     val accountId: String? = null,
-    val roleId: String? = null
+    val roleId: String? = null,
+    val boardId: String? = null
 ) {
     fun setExpired(): Token {
         this.expiredAt = LocalDateTime.now().minusDays(1)
         return this
     }
 
+
     companion object {
         fun generate(
             tokenId: String,
-            userId: UserId,
+            userId: UserId?,
             expiredAt: LocalDateTime,
             otpId: OtpId?,
             accountId: String?,
-            roleId: String?
+            roleId: String?,
+            boardId: String?
         ): Token {
+            val value = "RTT_" + generateTokenValue(length = if (boardId.isNullOrBlank()) 120 else 32)
             return Token(
                 tokenId = tokenId,
                 userId = userId,
-                value = generateTokenValue(),
+                value = value,
                 expiredAt = expiredAt,
                 otpId = otpId,
                 accountId = accountId,
-                roleId = roleId
+                roleId = roleId,
+                boardId = boardId
             )
         }
 
