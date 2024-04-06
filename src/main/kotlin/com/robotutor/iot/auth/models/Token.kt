@@ -56,7 +56,7 @@ data class Token(
         }
 
         private fun generateTokenValue(length: Int = 120): String {
-            val chars = ('a'..'z') + ('A'..'Z') + ('0'..'9') + "`~!@#$%^&*()_+=-".split("")
+            val chars = ('a'..'z') + ('A'..'Z') + ('0'..'9') + "_-".split("")
             return List(length + 10) { chars.random() }.joinToString("").substring(0, length)
         }
     }
