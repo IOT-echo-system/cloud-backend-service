@@ -3,10 +3,7 @@ package com.robotutor.iot.widgets.invoice.controllers
 import com.robotutor.iot.utils.filters.annotations.RequirePolicy
 import com.robotutor.iot.utils.models.BoardData
 import com.robotutor.iot.utils.models.UserAuthenticationData
-import com.robotutor.iot.widgets.invoice.controllers.views.InvoiceSeedDataView
-import com.robotutor.iot.widgets.invoice.controllers.views.InvoiceTitleRequest
-import com.robotutor.iot.widgets.invoice.controllers.views.InvoiceView
-import com.robotutor.iot.widgets.invoice.controllers.views.SeedItemRequest
+import com.robotutor.iot.widgets.invoice.controllers.views.*
 import com.robotutor.iot.widgets.invoice.services.InvoiceService
 import com.robotutor.iot.widgets.modals.WidgetId
 import org.springframework.validation.annotation.Validated
@@ -30,7 +27,7 @@ class InvoiceController(private val invoiceService: InvoiceService) {
         userAuthenticationData: UserAuthenticationData,
         @RequestParam widgetIds: List<WidgetId>
     ): Flux<InvoiceView> {
-        return invoiceService.getInvoice(userAuthenticationData, widgetIds).map { InvoiceView.form(it) }
+        return invoiceService.getInvoices(userAuthenticationData, widgetIds).map { InvoiceView.form(it) }
     }
 
     @RequirePolicy("WIDGET_INVOICE_UPDATE")
@@ -74,5 +71,38 @@ class InvoiceController(private val invoiceService: InvoiceService) {
     ): Mono<InvoiceSeedDataView> {
         return invoiceService.updateSeedData(widgetId, seedCode, seedItemRequest, boardData)
             .map { InvoiceSeedDataView.from(it) }
+    }
+
+    @RequirePolicy("WIDGET_INVOICE_ITEM_UPDATE")
+    @PutMapping("/{widgetId}/items/reset")
+    fun resetItems(@PathVariable widgetId: WidgetId, boardData: BoardData): Mono<InvoiceState> {
+        return invoiceService.resetItems(widgetId, boardData).map { InvoiceState.from(it) }
+    }
+
+    @RequirePolicy("WIDGET_INVOICE_ITEM_UPDATE")
+    @PostMapping("/{widgetId}/items")
+    fun addItem(
+        @PathVariable widgetId: WidgetId,
+        @RequestBody @Validated itemsRequest: ItemRequest,
+        boardData: BoardData
+    ): Mono<InvoiceState> {
+        return invoiceService.addItem(widgetId, itemsRequest, boardData).map { InvoiceState.from(it.invoice, it.error) }
+    }
+
+    @RequirePolicy("WIDGET_INVOICE_ITEM_UPDATE")
+    @DeleteMapping("/{widgetId}/items")
+    fun removeItem(
+        @PathVariable widgetId: WidgetId,
+        @RequestBody @Validated itemsRequest: ItemRequest,
+        boardData: BoardData
+    ): Mono<InvoiceState> {
+        return invoiceService.removeItem(widgetId, itemsRequest, boardData)
+            .map { InvoiceState.from(it.invoice, it.error) }
+    }
+
+    @RequirePolicy("WIDGET_INVOICE_ITEM_UPDATE")
+    @GetMapping("/{widgetId}/items")
+    fun getInvoiceState(@PathVariable widgetId: WidgetId, boardData: BoardData): Mono<InvoiceState> {
+        return invoiceService.getInvoice(widgetId, boardData).map { InvoiceState.from(it) }
     }
 }

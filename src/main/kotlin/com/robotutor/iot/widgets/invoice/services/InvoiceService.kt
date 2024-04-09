@@ -9,10 +9,13 @@ import com.robotutor.iot.utils.audit.auditOnSuccess
 import com.robotutor.iot.utils.models.BoardData
 import com.robotutor.iot.utils.models.UserAuthenticationData
 import com.robotutor.iot.utils.services.IdGeneratorService
+import com.robotutor.iot.utils.utils.createMono
 import com.robotutor.iot.widgets.invoice.controllers.views.InvoiceTitleRequest
+import com.robotutor.iot.widgets.invoice.controllers.views.ItemRequest
 import com.robotutor.iot.widgets.invoice.controllers.views.SeedItemRequest
 import com.robotutor.iot.widgets.invoice.modals.Invoice
 import com.robotutor.iot.widgets.invoice.modals.InvoiceSeedItem
+import com.robotutor.iot.widgets.invoice.modals.InvoiceWithError
 import com.robotutor.iot.widgets.invoice.repositories.InvoiceRepository
 import com.robotutor.iot.widgets.modals.IdType
 import com.robotutor.iot.widgets.modals.WidgetId
@@ -49,7 +52,7 @@ class InvoiceService(
             .logOnError(errorMessage = "Failed to add widget")
     }
 
-    fun getInvoice(userAuthenticationData: UserAuthenticationData, widgetIds: List<WidgetId>): Flux<Invoice> {
+    fun getInvoices(userAuthenticationData: UserAuthenticationData, widgetIds: List<WidgetId>): Flux<Invoice> {
         return invoiceRepository.findAllByWidgetIdInAndAccountId(widgetIds, userAuthenticationData.accountId)
     }
 
@@ -100,5 +103,50 @@ class InvoiceService(
             .logOnSuccess(message = "Successfully updated invoice seed item")
             .logOnError(errorMessage = "Failed to update invoice seed item")
             .map { it.getSeedItem(seedItemRequest.code) }
+    }
+
+    fun resetItems(widgetId: WidgetId, boardData: BoardData): Mono<Invoice> {
+        return invoiceRepository.findByWidgetIdAndBoardId(widgetId, boardData.boardId)
+            .flatMap {
+                invoiceRepository.save(it.resetItems())
+            }
+            .auditOnSuccess(mqttPublisher, AuditEvent.UPDATE_INVOICE_WIDGET_ITEM)
+            .auditOnError(mqttPublisher, AuditEvent.UPDATE_INVOICE_WIDGET_ITEM)
+            .logOnSuccess(message = "Successfully reset invoice cart")
+            .logOnError(errorMessage = "Failed to reset invoice cart")
+    }
+
+    fun addItem(widgetId: WidgetId, itemRequest: ItemRequest, boardData: BoardData): Mono<InvoiceWithError> {
+        return invoiceRepository.findByWidgetIdAndBoardId(widgetId, boardData.boardId)
+            .flatMap { invoice ->
+                invoiceRepository.save(invoice.addItem(itemRequest.code))
+                    .auditOnSuccess(mqttPublisher, AuditEvent.UPDATE_INVOICE_WIDGET_ITEM)
+                    .auditOnError(mqttPublisher, AuditEvent.UPDATE_INVOICE_WIDGET_ITEM)
+                    .logOnSuccess(message = "Successfully added item in invoice cart")
+                    .logOnError(errorMessage = "Failed to add item in invoice cart")
+                    .map { InvoiceWithError(it) }
+                    .onErrorResume {
+                        createMono(InvoiceWithError(invoice, it.message))
+                    }
+            }
+    }
+
+    fun removeItem(widgetId: WidgetId, itemRequest: ItemRequest, boardData: BoardData): Mono<InvoiceWithError> {
+        return invoiceRepository.findByWidgetIdAndBoardId(widgetId, boardData.boardId)
+            .flatMap { invoice ->
+                invoiceRepository.save(invoice.removeItem(itemRequest.code))
+                    .auditOnSuccess(mqttPublisher, AuditEvent.UPDATE_INVOICE_WIDGET_ITEM)
+                    .auditOnError(mqttPublisher, AuditEvent.UPDATE_INVOICE_WIDGET_ITEM)
+                    .logOnSuccess(message = "Successfully removed item in invoice cart")
+                    .logOnError(errorMessage = "Failed to remove item in invoice cart")
+                    .map { InvoiceWithError(it) }
+                    .onErrorResume {
+                        createMono(InvoiceWithError(invoice, it.message))
+                    }
+            }
+    }
+
+    fun getInvoice(widgetId: WidgetId, boardData: BoardData): Mono<Invoice> {
+        return invoiceRepository.findByWidgetIdAndBoardId(widgetId, boardData.boardId)
     }
 }

@@ -69,7 +69,7 @@ class RoleInitializer(private val roleService: RoleService, private val policyIn
                 roleId = "4".padStart(IdType.ROLE_ID.length, '0'),
                 name = "Board",
                 createdBy = "System",
-                policies = listOf<String>().map { policyInitializer.getPolicyId(it) }
+                policies = listOf("19").map { policyInitializer.getPolicyId(it) }
             ),
         )
         roles.forEach { role ->

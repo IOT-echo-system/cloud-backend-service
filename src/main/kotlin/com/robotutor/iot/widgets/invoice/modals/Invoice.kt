@@ -31,8 +31,7 @@ data class Invoice(
     val widgetType: WidgetType = WidgetType.INVOICE,
     val seed: MutableList<InvoiceSeedItem> = mutableListOf(),
     val cart: MutableList<CartItem> = mutableListOf(),
-    val totalItems: Int = 0,
-    val totalPrice: Double = 0.0,
+    var paid: Boolean = false,
     val createdAt: LocalDateTime = LocalDateTime.now(),
     @LastModifiedDate
     val lastModifiedDate: LocalDateTime = LocalDateTime.now(),
@@ -70,6 +69,51 @@ data class Invoice(
         return this
     }
 
+    fun resetItems(): Invoice {
+        this.cart.clear()
+        return this
+    }
+
+    fun addItem(code: String): Invoice {
+        val seedItem = this.seed.find { it.code == code }
+        if (seedItem == null) {
+            throw DataNotFoundException(IOTError.IOT0502)
+        }
+        val cartItem = this.cart.find { it.code == seedItem.code }
+        if (cartItem == null) {
+            this.cart.add(
+                CartItem(
+                    code = seedItem.code,
+                    name = seedItem.name,
+                    pricePerUnit = seedItem.pricePerUnit,
+                    unit = 1,
+                )
+            )
+        } else {
+            cartItem.addUnit()
+        }
+        return this
+    }
+
+    fun removeItem(code: String): Invoice {
+        val cartItem = this.getCartItem(code)
+        if (cartItem == null) {
+            throw DataNotFoundException(IOTError.IOT0503)
+        } else if (cartItem.unit == 1) {
+            this.cart.remove(cartItem)
+        } else
+            cartItem.removeUnit()
+        return this
+    }
+
+    private fun getCartItem(code: String): CartItem? {
+        val seedItem = this.seed.find { it.code == code }
+        if (seedItem == null) {
+            throw DataNotFoundException(IOTError.IOT0502)
+        }
+        return this.cart.find { it.code == seedItem.code }
+    }
+
     companion object {
         fun from(widgetId: String, boardId: String, accountId: String): Invoice {
             return Invoice(widgetId = widgetId, boardId = boardId, accountId = accountId)
@@ -89,4 +133,16 @@ data class InvoiceSeedItem(val code: String, val name: String, val pricePerUnit:
     }
 }
 
-data class CartItem(val code: String, val name: String, val pricePerUnit: Double, val unit: Int, val price: Double)
+data class CartItem(val code: String, val name: String, val pricePerUnit: Double, var unit: Int) {
+    fun addUnit(): CartItem {
+        this.unit += 1
+        return this
+    }
+
+    fun removeUnit(): CartItem {
+        this.unit -= 1
+        return this
+    }
+}
+
+data class InvoiceWithError(val invoice: Invoice, val error: String? = null)
