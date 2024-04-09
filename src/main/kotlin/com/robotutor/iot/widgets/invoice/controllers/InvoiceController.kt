@@ -101,7 +101,7 @@ class InvoiceController(private val invoiceService: InvoiceService) {
     }
 
     @RequirePolicy("WIDGET_INVOICE_ITEM_UPDATE")
-    @GetMapping("/{widgetId}/items")
+    @GetMapping("/{widgetId}/state")
     fun getInvoiceState(@PathVariable widgetId: WidgetId, boardData: BoardData): Mono<InvoiceState> {
         return invoiceService.getInvoice(widgetId, boardData).map { InvoiceState.from(it) }
     }
