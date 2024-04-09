@@ -14,6 +14,6 @@ class OtpStateUpdateScheduler(private val otpRepository: OtpRepository) {
             .flatMap {
                 otpRepository.save(it.setExpired())
             }
-            .blockLast()
+            .subscribe()
     }
 }

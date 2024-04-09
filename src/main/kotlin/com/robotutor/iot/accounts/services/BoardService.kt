@@ -12,6 +12,7 @@ import com.robotutor.iot.mqtt.models.AuditEvent
 import com.robotutor.iot.mqtt.services.MqttPublisher
 import com.robotutor.iot.utils.audit.auditOnError
 import com.robotutor.iot.utils.audit.auditOnSuccess
+import com.robotutor.iot.utils.models.BoardAuthenticationData
 import com.robotutor.iot.utils.models.UserAuthenticationData
 import com.robotutor.iot.utils.services.IdGeneratorService
 import org.springframework.stereotype.Service
@@ -52,6 +53,16 @@ class BoardService(
 
     fun isValidBoard(userAuthenticationData: UserAuthenticationData, boardId: BoardId): Mono<Board> {
         return boardRepository.findByAccountIdAndBoardId(userAuthenticationData.accountId, boardId)
+    }
+
+    fun updateBoardStatus(boardAuthenticationData: BoardAuthenticationData): Mono<Board> {
+        return boardRepository.findByAccountIdAndBoardId(
+            accountId = boardAuthenticationData.accountId,
+            boardId = boardAuthenticationData.boardId
+        )
+            .flatMap {
+                boardRepository.save(it.markHealthy())
+            }
     }
 
 }

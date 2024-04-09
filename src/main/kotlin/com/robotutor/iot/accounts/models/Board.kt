@@ -21,10 +21,23 @@ data class Board(
     val accountId: AccountId,
     var name: String,
     var status: BoardStatus = BoardStatus.UNHEALTHY,
+    var statusUpdatedAt: LocalDateTime = LocalDateTime.now(),
     val createdAt: LocalDateTime = LocalDateTime.now()
 ) {
     fun updateName(name: String): Board {
         this.name = name
+        return this
+    }
+
+    fun markHealthy(): Board {
+        this.status = BoardStatus.HEALTHY
+        this.statusUpdatedAt = LocalDateTime.now()
+        return this
+    }
+
+    fun markUnHealthy(): Board {
+        this.status = BoardStatus.UNHEALTHY
+        this.statusUpdatedAt = LocalDateTime.now()
         return this
     }
 
