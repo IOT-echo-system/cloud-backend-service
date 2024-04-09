@@ -8,7 +8,8 @@ data class BoardData(val boardId: String, val accountId: String) : IAuthenticati
             return UserAuthenticationData(
                 userId = userAuthenticationResponseData.userId,
                 accountId = userAuthenticationResponseData.projectId,
-                roleId = userAuthenticationResponseData.roleId
+                roleId = userAuthenticationResponseData.roleId,
+                boardId = userAuthenticationResponseData.boardId
             )
         }
     }

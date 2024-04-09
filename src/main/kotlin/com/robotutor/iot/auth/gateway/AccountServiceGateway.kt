@@ -16,7 +16,12 @@ class AccountServiceGateway(
     fun isValidAccountAndRole(userId: String, accountId: String, roleId: String): Mono<ValidateAccountResponse> {
         return accountController.isValidAccount(
             accountValidationRequest = AccountValidationRequest(accountId = accountId, roleId = roleId),
-            userAuthenticationData = UserAuthenticationData(userId = userId, accountId = accountId, roleId = roleId)
+            userAuthenticationData = UserAuthenticationData(
+                userId = userId,
+                accountId = accountId,
+                roleId = roleId,
+                boardId = null
+            )
         )
             .map {
                 ValidateAccountResponse(true)

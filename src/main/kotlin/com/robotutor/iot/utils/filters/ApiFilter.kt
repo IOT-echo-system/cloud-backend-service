@@ -80,7 +80,7 @@ class ApiFilter(
                 .map { userAuthenticationResponseData -> UserAuthenticationData.from(userAuthenticationResponseData) }
                 .contextWrite { it.put(ServerWebExchange::class.java, exchange) }
         } else {
-            createMono(UserAuthenticationData("Authorization not required", "account", "role"))
+            createMono(UserAuthenticationData("Authorization not required", "account", "role", null))
         }
             .flatMap { userAuthenticationData ->
                 if (isAllowedForAccounts(userAuthenticationData, exchange.request)) {
