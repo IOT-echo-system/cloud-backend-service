@@ -29,7 +29,8 @@ class PolicyInitializer(private val policyRepository: PolicyRepository) : Applic
             Policy(policyId = getPolicyId("15"), name = "WIDGET_INVOICE_UPDATE"),
             Policy(policyId = getPolicyId("16"), name = "WIDGET_INVOICE_DELETE"),
             Policy(policyId = getPolicyId("17"), name = "WIDGET_INVOICE_SEED_UPDATE"),
-            Policy(policyId = getPolicyId("19"), name = "WIDGET_INVOICE_ITEM_UPDATE")
+            Policy(policyId = getPolicyId("18"), name = "WIDGET_INVOICE_ITEM_UPDATE"),
+            Policy(policyId = getPolicyId("19"), name = "BOARD_STATUS_UPDATE"),
         )
         policies.forEach { policy ->
             policyRepository.findByPolicyId(policy.policyId)
