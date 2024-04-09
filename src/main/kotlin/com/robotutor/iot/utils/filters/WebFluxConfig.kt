@@ -2,6 +2,7 @@ package com.robotutor.iot.utils.filters
 
 import com.robotutor.iot.utils.gateway.BoardGateway
 import com.robotutor.iot.utils.gateway.PolicyGateway
+import com.robotutor.iot.utils.models.BoardAuthenticationData
 import org.springframework.context.annotation.Configuration
 import org.springframework.web.reactive.config.WebFluxConfigurer
 import org.springframework.web.reactive.result.method.annotation.ArgumentResolverConfigurer
@@ -11,5 +12,6 @@ class WebConfig(private val policyGateway: PolicyGateway, private val boardGatew
     override fun configureArgumentResolvers(configurer: ArgumentResolverConfigurer) {
         configurer.addCustomResolver(AuthenticationDataResolver(policyGateway))
         configurer.addCustomResolver(BoardDataResolver(boardGateway))
+        configurer.addCustomResolver(BoardAuthenticationDataResolver(policyGateway))
     }
 }

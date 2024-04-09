@@ -62,7 +62,7 @@ data class TokenSecretKeyResponse(val secretKey: String)
 data class LogoutResponse(val success: Boolean)
 data class ResetPasswordResponse(val success: Boolean)
 
-data class ValidateTokenResponse(val userId: UserId, val projectId: String, val roleId: String)
+data class ValidateTokenResponse(val userId: UserId, val projectId: String, val roleId: String, val boardId: String?)
 
 data class UserDetailsResponse(
     val userId: UserId,

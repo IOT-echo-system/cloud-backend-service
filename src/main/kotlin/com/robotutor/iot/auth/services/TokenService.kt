@@ -43,9 +43,10 @@ class TokenService(
         return tokenRepository.findByValueAndExpiredAtAfter(token)
             .map {
                 ValidateTokenResponse(
-                    userId = it.userId!!,
+                    userId = it.userId,
                     projectId = it.accountId ?: "",
-                    roleId = it.roleId ?: ""
+                    roleId = it.roleId ?: "",
+                    boardId = it.boardId
                 )
             }
             .switchIfEmpty {
@@ -56,7 +57,7 @@ class TokenService(
     }
 
     fun generateToken(
-        userId: UserId? = null,
+        userId: UserId,
         expiredAt: LocalDateTime,
         otpId: OtpId? = null,
         accountId: String? = null,
@@ -105,10 +106,10 @@ class TokenService(
 
     private fun resetPassword(token: Token, resetPasswordRequest: ResetPasswordRequest): Mono<UserDetails> {
         return if (token.otpId != null) {
-            userService.resetPassword(token.userId!!, resetPasswordRequest.password)
+            userService.resetPassword(token.userId, resetPasswordRequest.password)
         } else {
             userService.resetPassword(
-                token.userId!!,
+                token.userId,
                 resetPasswordRequest.currentPassword ?: "",
                 resetPasswordRequest.password
             )
@@ -119,7 +120,7 @@ class TokenService(
         return tokenRepository.findByValueAndExpiredAtAfter(tokenString)
             .flatMap { token ->
                 accountServiceGateway.isValidAccountAndRole(
-                    userId = token.userId!!,
+                    userId = token.userId,
                     accountId = updateTokenRequest.projectId,
                     roleId = updateTokenRequest.roleId
                 )
@@ -155,7 +156,8 @@ class TokenService(
                             expiredAt = LocalDateTime.now().plusYears(100),
                             accountId = authenticationData.accountId,
                             roleId = "00004",
-                            boardId = boardId
+                            boardId = boardId,
+                            userId = "Board_$boardId"
                         )
                     }
             }

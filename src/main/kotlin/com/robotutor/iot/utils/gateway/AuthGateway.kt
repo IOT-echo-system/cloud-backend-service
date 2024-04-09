@@ -10,7 +10,12 @@ class AuthGateway(private val authController: AuthController) {
     fun validate(token: String?): Mono<UserAuthenticationResponseData> {
         return authController.validateToken(token = token ?: "")
             .map {
-                UserAuthenticationResponseData(userId = it.userId, projectId = it.projectId, roleId = it.roleId)
+                UserAuthenticationResponseData(
+                    userId = it.userId,
+                    projectId = it.projectId,
+                    roleId = it.roleId,
+                    boardId = it.boardId
+                )
             }
     }
 }

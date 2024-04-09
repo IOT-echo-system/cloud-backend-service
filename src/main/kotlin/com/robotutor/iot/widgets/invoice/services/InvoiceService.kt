@@ -6,6 +6,7 @@ import com.robotutor.iot.mqtt.models.AuditEvent
 import com.robotutor.iot.mqtt.services.MqttPublisher
 import com.robotutor.iot.utils.audit.auditOnError
 import com.robotutor.iot.utils.audit.auditOnSuccess
+import com.robotutor.iot.utils.models.BoardAuthenticationData
 import com.robotutor.iot.utils.models.BoardData
 import com.robotutor.iot.utils.models.UserAuthenticationData
 import com.robotutor.iot.utils.services.IdGeneratorService
@@ -105,7 +106,7 @@ class InvoiceService(
             .map { it.getSeedItem(seedItemRequest.code) }
     }
 
-    fun resetItems(widgetId: WidgetId, boardData: BoardData): Mono<Invoice> {
+    fun resetItems(widgetId: WidgetId, boardData: BoardAuthenticationData): Mono<Invoice> {
         return invoiceRepository.findByWidgetIdAndBoardId(widgetId, boardData.boardId)
             .flatMap {
                 invoiceRepository.save(it.resetItems())
@@ -116,7 +117,7 @@ class InvoiceService(
             .logOnError(errorMessage = "Failed to reset invoice cart")
     }
 
-    fun addItem(widgetId: WidgetId, itemRequest: ItemRequest, boardData: BoardData): Mono<InvoiceWithError> {
+    fun addItem(widgetId: WidgetId, itemRequest: ItemRequest, boardData: BoardAuthenticationData): Mono<InvoiceWithError> {
         return invoiceRepository.findByWidgetIdAndBoardId(widgetId, boardData.boardId)
             .flatMap { invoice ->
                 invoiceRepository.save(invoice.addItem(itemRequest.code))
@@ -131,7 +132,7 @@ class InvoiceService(
             }
     }
 
-    fun removeItem(widgetId: WidgetId, itemRequest: ItemRequest, boardData: BoardData): Mono<InvoiceWithError> {
+    fun removeItem(widgetId: WidgetId, itemRequest: ItemRequest, boardData: BoardAuthenticationData): Mono<InvoiceWithError> {
         return invoiceRepository.findByWidgetIdAndBoardId(widgetId, boardData.boardId)
             .flatMap { invoice ->
                 invoiceRepository.save(invoice.removeItem(itemRequest.code))
@@ -146,7 +147,7 @@ class InvoiceService(
             }
     }
 
-    fun getInvoice(widgetId: WidgetId, boardData: BoardData): Mono<Invoice> {
+    fun getInvoice(widgetId: WidgetId, boardData: BoardAuthenticationData): Mono<Invoice> {
         return invoiceRepository.findByWidgetIdAndBoardId(widgetId, boardData.boardId)
     }
 }
