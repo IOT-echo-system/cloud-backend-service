@@ -2,7 +2,6 @@ package com.robotutor.iot.utils.filters
 
 import com.robotutor.iot.utils.gateway.BoardGateway
 import com.robotutor.iot.utils.gateway.PolicyGateway
-import com.robotutor.iot.utils.models.BoardAuthenticationData
 import org.springframework.context.annotation.Configuration
 import org.springframework.web.reactive.config.WebFluxConfigurer
 import org.springframework.web.reactive.result.method.annotation.ArgumentResolverConfigurer

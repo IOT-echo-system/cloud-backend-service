@@ -18,7 +18,7 @@ import reactor.core.publisher.Mono
 @Configuration
 class BoardAuthenticationDataResolver(private val policyGateway: PolicyGateway) : HandlerMethodArgumentResolver {
     override fun supportsParameter(parameter: MethodParameter): Boolean {
-        return parameter.parameterType == BoardAuthenticationDataResolver::class.java
+        return parameter.parameterType == BoardAuthenticationData::class.java
     }
 
     override fun resolveArgument(

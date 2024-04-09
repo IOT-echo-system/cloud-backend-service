@@ -12,7 +12,6 @@ import com.robotutor.iot.utils.models.UserAuthenticationData
 import com.robotutor.iot.utils.services.IdGeneratorService
 import com.robotutor.iot.utils.utils.createMono
 import com.robotutor.iot.widgets.invoice.controllers.views.InvoiceTitleRequest
-import com.robotutor.iot.widgets.invoice.controllers.views.ItemRequest
 import com.robotutor.iot.widgets.invoice.controllers.views.SeedItemRequest
 import com.robotutor.iot.widgets.invoice.modals.Invoice
 import com.robotutor.iot.widgets.invoice.modals.InvoiceSeedItem
@@ -117,10 +116,10 @@ class InvoiceService(
             .logOnError(errorMessage = "Failed to reset invoice cart")
     }
 
-    fun addItem(widgetId: WidgetId, itemRequest: ItemRequest, boardData: BoardAuthenticationData): Mono<InvoiceWithError> {
+    fun addItem(widgetId: WidgetId, code: String, boardData: BoardAuthenticationData): Mono<InvoiceWithError> {
         return invoiceRepository.findByWidgetIdAndBoardId(widgetId, boardData.boardId)
             .flatMap { invoice ->
-                invoiceRepository.save(invoice.addItem(itemRequest.code))
+                invoiceRepository.save(invoice.addItem(code))
                     .auditOnSuccess(mqttPublisher, AuditEvent.UPDATE_INVOICE_WIDGET_ITEM)
                     .auditOnError(mqttPublisher, AuditEvent.UPDATE_INVOICE_WIDGET_ITEM)
                     .logOnSuccess(message = "Successfully added item in invoice cart")
@@ -132,10 +131,10 @@ class InvoiceService(
             }
     }
 
-    fun removeItem(widgetId: WidgetId, itemRequest: ItemRequest, boardData: BoardAuthenticationData): Mono<InvoiceWithError> {
+    fun removeItem(widgetId: WidgetId, code: String, boardData: BoardAuthenticationData): Mono<InvoiceWithError> {
         return invoiceRepository.findByWidgetIdAndBoardId(widgetId, boardData.boardId)
             .flatMap { invoice ->
-                invoiceRepository.save(invoice.removeItem(itemRequest.code))
+                invoiceRepository.save(invoice.removeItem(code))
                     .auditOnSuccess(mqttPublisher, AuditEvent.UPDATE_INVOICE_WIDGET_ITEM)
                     .auditOnError(mqttPublisher, AuditEvent.UPDATE_INVOICE_WIDGET_ITEM)
                     .logOnSuccess(message = "Successfully removed item in invoice cart")

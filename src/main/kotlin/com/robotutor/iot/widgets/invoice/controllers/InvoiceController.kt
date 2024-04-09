@@ -76,34 +76,41 @@ class InvoiceController(private val invoiceService: InvoiceService) {
 
     @RequirePolicy("WIDGET_INVOICE_ITEM_UPDATE")
     @PutMapping("/{widgetId}/items/reset")
-    fun resetItems(@PathVariable widgetId: WidgetId, boardAuthenticationData: BoardAuthenticationData): Mono<InvoiceState> {
+    fun resetItems(
+        @PathVariable widgetId: WidgetId,
+        boardAuthenticationData: BoardAuthenticationData
+    ): Mono<InvoiceState> {
         return invoiceService.resetItems(widgetId, boardAuthenticationData).map { InvoiceState.from(it) }
     }
 
     @RequirePolicy("WIDGET_INVOICE_ITEM_UPDATE")
-    @PostMapping("/{widgetId}/items")
+    @PostMapping("/{widgetId}/items/{code}")
     fun addItem(
         @PathVariable widgetId: WidgetId,
-        @RequestBody @Validated itemsRequest: ItemRequest,
+        @PathVariable code: String,
         boardAuthenticationData: BoardAuthenticationData
     ): Mono<InvoiceState> {
-        return invoiceService.addItem(widgetId, itemsRequest, boardAuthenticationData).map { InvoiceState.from(it.invoice, it.error) }
+        return invoiceService.addItem(widgetId, code, boardAuthenticationData)
+            .map { InvoiceState.from(it.invoice, it.error) }
     }
 
     @RequirePolicy("WIDGET_INVOICE_ITEM_UPDATE")
-    @DeleteMapping("/{widgetId}/items")
+    @DeleteMapping("/{widgetId}/items/{code}")
     fun removeItem(
         @PathVariable widgetId: WidgetId,
-        @RequestBody @Validated itemsRequest: ItemRequest,
+        @PathVariable code: String,
         boardAuthenticationData: BoardAuthenticationData
     ): Mono<InvoiceState> {
-        return invoiceService.removeItem(widgetId, itemsRequest, boardAuthenticationData)
+        return invoiceService.removeItem(widgetId, code, boardAuthenticationData)
             .map { InvoiceState.from(it.invoice, it.error) }
     }
 
     @RequirePolicy("WIDGET_INVOICE_ITEM_UPDATE")
     @GetMapping("/{widgetId}/state")
-    fun getInvoiceState(@PathVariable widgetId: WidgetId, boardAuthenticationData: BoardAuthenticationData): Mono<InvoiceState> {
+    fun getInvoiceState(
+        @PathVariable widgetId: WidgetId,
+        boardAuthenticationData: BoardAuthenticationData
+    ): Mono<InvoiceState> {
         return invoiceService.getInvoice(widgetId, boardAuthenticationData).map { InvoiceState.from(it) }
     }
 }
