@@ -29,8 +29,8 @@ data class InvoiceView(
                 projectId = invoice.accountId,
                 widgetType = invoice.widgetType,
                 cart = invoice.cart,
-                totalItems = invoice.totalItems,
-                totalPrice = invoice.totalPrice,
+                totalItems = invoice.cart.sumOf { it.unit },
+                totalPrice = invoice.cart.sumOf { it.unit * it.pricePerUnit },
                 lastModifiedDate = invoice.lastModifiedDate,
             )
         }
