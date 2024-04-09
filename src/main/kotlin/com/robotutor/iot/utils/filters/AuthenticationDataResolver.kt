@@ -4,7 +4,6 @@ import com.robotutor.iot.utils.exceptions.AccessDeniedException
 import com.robotutor.iot.utils.exceptions.IOTError
 import com.robotutor.iot.utils.filters.annotations.RequirePolicy
 import com.robotutor.iot.utils.gateway.PolicyGateway
-import com.robotutor.iot.utils.models.BoardAuthenticationData
 import com.robotutor.iot.utils.models.UserAuthenticationData
 import com.robotutor.iot.utils.utils.createMono
 import com.robotutor.iot.utils.utils.createMonoError
@@ -26,11 +25,9 @@ class AuthenticationDataResolver(private val policyGateway: PolicyGateway) : Han
         bindingContext: BindingContext,
         exchange: ServerWebExchange
     ): Mono<Any> {
-
         return Mono.deferContextual { context ->
             val annotation = parameter.getMethodAnnotation(RequirePolicy::class.java)
             val userAuthenticationData = context.get(UserAuthenticationData::class.java)
-            val boardAuthenticationData = BoardAuthenticationData.from(userAuthenticationData)
             if (annotation != null) {
                 policyGateway.getPolicies(userAuthenticationData)
                     .map { userAccountPoliciesResponseData ->
@@ -38,13 +35,13 @@ class AuthenticationDataResolver(private val policyGateway: PolicyGateway) : Han
                     }
                     .flatMap {
                         if (it) {
-                            createMono(boardAuthenticationData)
+                            createMono(userAuthenticationData)
                         } else {
                             createMonoError(AccessDeniedException(IOTError.IOT0103))
                         }
                     }
             } else {
-                createMono(boardAuthenticationData)
+                createMono(userAuthenticationData)
             }
         }
     }
