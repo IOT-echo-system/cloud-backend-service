@@ -11,7 +11,11 @@ import com.robotutor.iot.utils.models.BoardData
 import com.robotutor.iot.utils.models.UserAuthenticationData
 import com.robotutor.iot.utils.services.IdGeneratorService
 import com.robotutor.iot.utils.utils.createMono
+import com.robotutor.iot.webClient.WebClientWrapper
+import com.robotutor.iot.widgets.config.NodeBffGatewayConfig
+import com.robotutor.iot.widgets.invoice.controllers.views.InvoiceState
 import com.robotutor.iot.widgets.invoice.controllers.views.InvoiceTitleRequest
+import com.robotutor.iot.widgets.invoice.controllers.views.PaymentRequestBody
 import com.robotutor.iot.widgets.invoice.controllers.views.SeedItemRequest
 import com.robotutor.iot.widgets.invoice.modals.Invoice
 import com.robotutor.iot.widgets.invoice.modals.InvoiceSeedItem
@@ -32,6 +36,8 @@ class InvoiceService(
     private val idGeneratorService: IdGeneratorService,
     private val widgetService: WidgetService,
     private val mqttPublisher: MqttPublisher,
+    private val webClientWrapper: WebClientWrapper,
+    private val nodeBffGatewayConfig: NodeBffGatewayConfig
 ) {
     fun addInvoice(boardData: BoardData): Mono<Invoice> {
         return idGeneratorService.generateId(IdType.INVOICE_ID)
@@ -148,5 +154,35 @@ class InvoiceService(
 
     fun getInvoice(widgetId: WidgetId, boardData: BoardAuthenticationData): Mono<Invoice> {
         return invoiceRepository.findByWidgetIdAndBoardId(widgetId, boardData.boardId)
+    }
+
+    fun updatePaymentStatus(
+        widgetId: WidgetId,
+        paymentRequestBody: PaymentRequestBody,
+        boardAuthenticationData: BoardAuthenticationData,
+    ): Mono<Invoice> {
+        return invoiceRepository.findByWidgetIdAndBoardId(widgetId, boardAuthenticationData.boardId)
+            .flatMap {
+                invoiceRepository.save(it.updatePaymentStatus(paymentRequestBody.paid))
+            }
+            .auditOnSuccess(mqttPublisher, AuditEvent.UPDATE_INVOICE_PAYMENT)
+            .auditOnError(mqttPublisher, AuditEvent.UPDATE_INVOICE_PAYMENT)
+            .logOnSuccess(message = "Successfully updated invoice payment")
+            .logOnError(errorMessage = "Failed to update invoice payment")
+            .flatMap { invoice ->
+                webClientWrapper.post(
+                    baseUrl = nodeBffGatewayConfig.baseUrl,
+                    path = "/widgets/invoices/{invoiceId}/state",
+                    body = InvoiceState.from(invoice),
+                    uriVariables = mapOf("invoiceId" to invoice.widgetId),
+                    headers = mapOf(
+                        "boardId" to invoice.boardId,
+                        "widgetName" to invoice.widgetType.toString(),
+                        "widgetId" to invoice.widgetId
+                    ),
+                    returnType = String::class.java
+                )
+                    .map { invoice }
+            }
     }
 }

@@ -63,3 +63,6 @@ data class SeedItemRequest(
     @Min(value = 0, message = "Seed invoice price per Unit should a valid number")
     val pricePerUnit: Double
 )
+
+
+data class PaymentRequestBody(val paid: Boolean)

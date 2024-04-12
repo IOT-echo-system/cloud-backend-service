@@ -113,4 +113,14 @@ class InvoiceController(private val invoiceService: InvoiceService) {
     ): Mono<InvoiceState> {
         return invoiceService.getInvoice(widgetId, boardAuthenticationData).map { InvoiceState.from(it) }
     }
+
+    @RequirePolicy("WIDGET_INVOICE_PAYMENT_UPDATE")
+    @PutMapping("/{widgetId}/payment")
+    fun updatePaymentState(
+        @PathVariable widgetId: WidgetId,
+        @Validated @RequestBody paymentRequestBody: PaymentRequestBody,
+        boardAuthenticationData: BoardAuthenticationData
+    ): Mono<InvoiceState> {
+        return invoiceService.updatePaymentStatus(widgetId, paymentRequestBody, boardAuthenticationData).map { InvoiceState.from(it) }
+    }
 }

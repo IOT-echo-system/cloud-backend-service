@@ -1,5 +1,6 @@
 package com.robotutor.iot.widgets.invoice.modals
 
+import com.robotutor.iot.utils.exceptions.BadDataException
 import com.robotutor.iot.utils.exceptions.DataNotFoundException
 import com.robotutor.iot.utils.exceptions.DuplicateDataException
 import com.robotutor.iot.widgets.exceptions.IOTError
@@ -75,6 +76,9 @@ data class Invoice(
     }
 
     fun addItem(code: String): Invoice {
+        if (this.paid) {
+            throw BadDataException(IOTError.IOT0503)
+        }
         val seedItem = this.seed.find { it.code == code }
         if (seedItem == null) {
             throw DataNotFoundException(IOTError.IOT0502)
@@ -96,6 +100,9 @@ data class Invoice(
     }
 
     fun removeItem(code: String): Invoice {
+        if (this.paid) {
+            throw BadDataException(IOTError.IOT0504)
+        }
         val cartItem = this.getCartItem(code)
         if (cartItem == null) {
             throw DataNotFoundException(IOTError.IOT0503)
@@ -112,6 +119,11 @@ data class Invoice(
             throw DataNotFoundException(IOTError.IOT0502)
         }
         return this.cart.find { it.code == seedItem.code }
+    }
+
+    fun updatePaymentStatus(paid: Boolean): Invoice {
+        this.paid = paid
+        return this
     }
 
     companion object {

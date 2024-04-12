@@ -46,3 +46,7 @@ app:
     account-gateway:
       base-url: http://localhost:${server.port}
       validate-role-and-account-path: '/accounts/validate'
+
+  widgets:
+    node-bff:
+      base-url: ${NODE_BFF_URL}/api
