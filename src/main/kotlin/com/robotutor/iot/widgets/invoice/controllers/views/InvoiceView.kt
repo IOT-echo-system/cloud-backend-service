@@ -15,7 +15,7 @@ data class InvoiceView(
     val projectId: String,
     val title: String,
     val widgetType: WidgetType,
-    val cart: List<CartItem>,
+    val cart: List<CartItemView>,
     val totalItems: Int,
     val totalPrice: Double,
     val lastModifiedDate: LocalDateTime
@@ -28,10 +28,30 @@ data class InvoiceView(
                 title = invoice.title,
                 projectId = invoice.accountId,
                 widgetType = invoice.widgetType,
-                cart = invoice.cart,
+                cart = invoice.cart.map { CartItemView.from(it) },
                 totalItems = invoice.cart.sumOf { it.unit },
                 totalPrice = invoice.cart.sumOf { it.unit * it.pricePerUnit },
                 lastModifiedDate = invoice.lastModifiedDate,
+            )
+        }
+    }
+}
+
+data class CartItemView(
+    val code: String,
+    val name: String,
+    val pricePerUnit: Double,
+    var unit: Int,
+    val price: Double
+) {
+    companion object {
+        fun from(cartItem: CartItem): CartItemView {
+            return CartItemView(
+                code = cartItem.code,
+                name = cartItem.name,
+                pricePerUnit = cartItem.pricePerUnit,
+                unit = cartItem.unit,
+                price = cartItem.pricePerUnit * cartItem.unit
             )
         }
     }
