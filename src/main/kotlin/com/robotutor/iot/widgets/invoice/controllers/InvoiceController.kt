@@ -2,8 +2,8 @@ package com.robotutor.iot.widgets.invoice.controllers
 
 import com.robotutor.iot.utils.filters.annotations.RequirePolicy
 import com.robotutor.iot.utils.models.BoardAuthenticationData
-import com.robotutor.iot.utils.models.BoardData
 import com.robotutor.iot.utils.models.UserAuthenticationData
+import com.robotutor.iot.utils.models.UserBoardAuthenticationData
 import com.robotutor.iot.widgets.invoice.controllers.views.*
 import com.robotutor.iot.widgets.invoice.services.InvoiceService
 import com.robotutor.iot.widgets.modals.WidgetId
@@ -18,8 +18,8 @@ class InvoiceController(private val invoiceService: InvoiceService) {
 
     @RequirePolicy("WIDGET_INVOICE_CREATE")
     @PostMapping
-    fun addInvoice(boardData: BoardData): Mono<InvoiceView> {
-        return invoiceService.addInvoice(boardData).map { InvoiceView.form(it) }
+    fun addInvoice(userBoardAuthenticationData: UserBoardAuthenticationData): Mono<InvoiceView> {
+        return invoiceService.addInvoice(userBoardAuthenticationData).map { InvoiceView.form(it) }
     }
 
     @RequirePolicy("WIDGET_INVOICE_GET")
@@ -36,15 +36,15 @@ class InvoiceController(private val invoiceService: InvoiceService) {
     fun updateInvoiceTitle(
         @PathVariable widgetId: WidgetId,
         @Validated @RequestBody invoiceTitleRequest: InvoiceTitleRequest,
-        boardData: BoardData
+        userBoardAuthenticationData: UserBoardAuthenticationData
     ): Mono<InvoiceView> {
-        return invoiceService.updateInvoiceTitle(widgetId, boardData, invoiceTitleRequest).map { InvoiceView.form(it) }
+        return invoiceService.updateInvoiceTitle(widgetId, userBoardAuthenticationData, invoiceTitleRequest).map { InvoiceView.form(it) }
     }
 
     @RequirePolicy("WIDGET_INVOICE_SEED_UPDATE")
     @GetMapping("/{widgetId}/seed")
-    fun getSeedData(@PathVariable widgetId: WidgetId, boardData: BoardData): Mono<List<InvoiceSeedDataView>> {
-        return invoiceService.getSeedData(widgetId, boardData)
+    fun getSeedData(@PathVariable widgetId: WidgetId, userBoardAuthenticationData: UserBoardAuthenticationData): Mono<List<InvoiceSeedDataView>> {
+        return invoiceService.getSeedData(widgetId, userBoardAuthenticationData)
             .map { invoiceSeedItems ->
                 invoiceSeedItems.map { invoiceSeedItem ->
                     InvoiceSeedDataView.from(invoiceSeedItem)
@@ -57,9 +57,9 @@ class InvoiceController(private val invoiceService: InvoiceService) {
     fun addSeedData(
         @PathVariable widgetId: WidgetId,
         @Validated @RequestBody seedItemRequest: SeedItemRequest,
-        boardData: BoardData
+        userBoardAuthenticationData: UserBoardAuthenticationData
     ): Mono<InvoiceSeedDataView> {
-        return invoiceService.addSeedData(widgetId, boardData, seedItemRequest).map { InvoiceSeedDataView.from(it) }
+        return invoiceService.addSeedData(widgetId, userBoardAuthenticationData, seedItemRequest).map { InvoiceSeedDataView.from(it) }
     }
 
     @RequirePolicy("WIDGET_INVOICE_SEED_UPDATE")
@@ -68,9 +68,9 @@ class InvoiceController(private val invoiceService: InvoiceService) {
         @PathVariable widgetId: WidgetId,
         @PathVariable seedCode: String,
         @Validated @RequestBody seedItemRequest: SeedItemRequest,
-        boardData: BoardData
+        userBoardAuthenticationData: UserBoardAuthenticationData
     ): Mono<InvoiceSeedDataView> {
-        return invoiceService.updateSeedData(widgetId, seedCode, seedItemRequest, boardData)
+        return invoiceService.updateSeedData(widgetId, seedCode, seedItemRequest, userBoardAuthenticationData)
             .map { InvoiceSeedDataView.from(it) }
     }
 
@@ -119,8 +119,8 @@ class InvoiceController(private val invoiceService: InvoiceService) {
     fun updatePaymentState(
         @PathVariable widgetId: WidgetId,
         @Validated @RequestBody paymentRequestBody: PaymentRequestBody,
-        boardAuthenticationData: BoardAuthenticationData
+        userBoardAuthenticationData: UserBoardAuthenticationData
     ): Mono<InvoiceState> {
-        return invoiceService.updatePaymentStatus(widgetId, paymentRequestBody, boardAuthenticationData).map { InvoiceState.from(it) }
+        return invoiceService.updatePaymentStatus(widgetId, paymentRequestBody, userBoardAuthenticationData).map { InvoiceState.from(it) }
     }
 }

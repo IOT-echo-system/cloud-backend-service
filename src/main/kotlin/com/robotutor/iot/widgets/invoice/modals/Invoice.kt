@@ -72,6 +72,7 @@ data class Invoice(
 
     fun resetItems(): Invoice {
         this.cart.clear()
+        this.paid = false
         return this
     }
 

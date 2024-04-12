@@ -7,10 +7,9 @@ import com.robotutor.iot.mqtt.services.MqttPublisher
 import com.robotutor.iot.utils.audit.auditOnError
 import com.robotutor.iot.utils.audit.auditOnSuccess
 import com.robotutor.iot.utils.models.BoardAuthenticationData
-import com.robotutor.iot.utils.models.BoardData
 import com.robotutor.iot.utils.models.UserAuthenticationData
+import com.robotutor.iot.utils.models.UserBoardAuthenticationData
 import com.robotutor.iot.utils.services.IdGeneratorService
-import com.robotutor.iot.utils.utils.createMono
 import com.robotutor.iot.webClient.WebClientWrapper
 import com.robotutor.iot.widgets.config.NodeBffGatewayConfig
 import com.robotutor.iot.widgets.invoice.controllers.views.InvoiceState
@@ -39,13 +38,13 @@ class InvoiceService(
     private val webClientWrapper: WebClientWrapper,
     private val nodeBffGatewayConfig: NodeBffGatewayConfig
 ) {
-    fun addInvoice(boardData: BoardData): Mono<Invoice> {
+    fun addInvoice(userBoardAuthenticationData: UserBoardAuthenticationData): Mono<Invoice> {
         return idGeneratorService.generateId(IdType.INVOICE_ID)
             .flatMap { invoiceId ->
                 widgetService.addWidget(
                     foreignWidgetId = invoiceId,
-                    accountId = boardData.accountId,
-                    boardId = boardData.boardId,
+                    accountId = userBoardAuthenticationData.accountId,
+                    boardId = userBoardAuthenticationData.boardId,
                     widgetType = WidgetType.INVOICE
                 )
             }
@@ -64,10 +63,10 @@ class InvoiceService(
 
     fun updateInvoiceTitle(
         widgetId: WidgetId,
-        boardData: BoardData,
+        userBoardAuthenticationData: UserBoardAuthenticationData,
         invoiceTitleRequest: InvoiceTitleRequest
     ): Mono<Invoice> {
-        return invoiceRepository.findByWidgetIdAndBoardId(widgetId, boardData.boardId)
+        return invoiceRepository.findByWidgetIdAndBoardId(widgetId, userBoardAuthenticationData.boardId)
             .flatMap {
                 invoiceRepository.save(it.updateTitle(invoiceTitleRequest.name))
                     .auditOnSuccess(mqttPublisher, AuditEvent.UPDATE_WIDGET_TITLE)
@@ -77,13 +76,13 @@ class InvoiceService(
             }
     }
 
-    fun getSeedData(widgetId: WidgetId, boardData: BoardData): Mono<List<InvoiceSeedItem>> {
-        return invoiceRepository.findByWidgetIdAndBoardId(widgetId, boardData.boardId)
+    fun getSeedData(widgetId: WidgetId, userBoardAuthenticationData: UserBoardAuthenticationData): Mono<List<InvoiceSeedItem>> {
+        return invoiceRepository.findByWidgetIdAndBoardId(widgetId, userBoardAuthenticationData.boardId)
             .map { it.seed }
     }
 
-    fun addSeedData(widgetId: WidgetId, boardData: BoardData, seedItemRequest: SeedItemRequest): Mono<InvoiceSeedItem> {
-        return invoiceRepository.findByWidgetIdAndBoardId(widgetId, boardData.boardId)
+    fun addSeedData(widgetId: WidgetId, userBoardAuthenticationData: UserBoardAuthenticationData, seedItemRequest: SeedItemRequest): Mono<InvoiceSeedItem> {
+        return invoiceRepository.findByWidgetIdAndBoardId(widgetId, userBoardAuthenticationData.boardId)
             .flatMap {
                 invoiceRepository.save(it.addSeedItem(seedItemRequest))
             }
@@ -98,9 +97,9 @@ class InvoiceService(
         widgetId: WidgetId,
         seedCode: String,
         seedItemRequest: SeedItemRequest,
-        boardData: BoardData
+        userBoardAuthenticationData: UserBoardAuthenticationData
     ): Mono<InvoiceSeedItem> {
-        return invoiceRepository.findByWidgetIdAndBoardId(widgetId, boardData.boardId)
+        return invoiceRepository.findByWidgetIdAndBoardId(widgetId, userBoardAuthenticationData.boardId)
             .flatMap {
                 invoiceRepository.save(it.updateSeedItem(seedCode, seedItemRequest))
             }
@@ -113,8 +112,11 @@ class InvoiceService(
 
     fun resetItems(widgetId: WidgetId, boardData: BoardAuthenticationData): Mono<Invoice> {
         return invoiceRepository.findByWidgetIdAndBoardId(widgetId, boardData.boardId)
+            .map {
+                it.resetItems()
+            }
             .flatMap {
-                invoiceRepository.save(it.resetItems())
+                invoiceRepository.save(it)
             }
             .auditOnSuccess(mqttPublisher, AuditEvent.UPDATE_INVOICE_WIDGET_ITEM)
             .auditOnError(mqttPublisher, AuditEvent.UPDATE_INVOICE_WIDGET_ITEM)
@@ -124,30 +126,42 @@ class InvoiceService(
 
     fun addItem(widgetId: WidgetId, code: String, boardData: BoardAuthenticationData): Mono<InvoiceWithError> {
         return invoiceRepository.findByWidgetIdAndBoardId(widgetId, boardData.boardId)
-            .flatMap { invoice ->
-                invoiceRepository.save(invoice.addItem(code))
-                    .auditOnSuccess(mqttPublisher, AuditEvent.UPDATE_INVOICE_WIDGET_ITEM)
-                    .auditOnError(mqttPublisher, AuditEvent.UPDATE_INVOICE_WIDGET_ITEM)
-                    .logOnSuccess(message = "Successfully added item in invoice cart")
-                    .logOnError(errorMessage = "Failed to add item in invoice cart")
-                    .map { InvoiceWithError(it) }
-                    .onErrorResume {
-                        createMono(InvoiceWithError(invoice, it.message))
+            .map { invoice ->
+                invoice.addItem(code)
+            }
+            .flatMap {
+                invoiceRepository.save(it)
+            }
+            .auditOnSuccess(mqttPublisher, AuditEvent.UPDATE_INVOICE_WIDGET_ITEM)
+            .auditOnError(mqttPublisher, AuditEvent.UPDATE_INVOICE_WIDGET_ITEM)
+            .logOnSuccess(message = "Successfully added item in invoice cart")
+            .logOnError(errorMessage = "Failed to add item in invoice cart")
+            .map { InvoiceWithError(it) }
+            .onErrorResume {
+                invoiceRepository.findByWidgetIdAndBoardId(widgetId, boardData.boardId)
+                    .map { invoice ->
+                        InvoiceWithError(invoice, it.message)
                     }
             }
     }
 
     fun removeItem(widgetId: WidgetId, code: String, boardData: BoardAuthenticationData): Mono<InvoiceWithError> {
         return invoiceRepository.findByWidgetIdAndBoardId(widgetId, boardData.boardId)
+            .map {
+                it.removeItem(code)
+            }
             .flatMap { invoice ->
-                invoiceRepository.save(invoice.removeItem(code))
-                    .auditOnSuccess(mqttPublisher, AuditEvent.UPDATE_INVOICE_WIDGET_ITEM)
-                    .auditOnError(mqttPublisher, AuditEvent.UPDATE_INVOICE_WIDGET_ITEM)
-                    .logOnSuccess(message = "Successfully removed item in invoice cart")
-                    .logOnError(errorMessage = "Failed to remove item in invoice cart")
-                    .map { InvoiceWithError(it) }
-                    .onErrorResume {
-                        createMono(InvoiceWithError(invoice, it.message))
+                invoiceRepository.save(invoice)
+            }
+            .auditOnSuccess(mqttPublisher, AuditEvent.UPDATE_INVOICE_WIDGET_ITEM)
+            .auditOnError(mqttPublisher, AuditEvent.UPDATE_INVOICE_WIDGET_ITEM)
+            .logOnSuccess(message = "Successfully removed item in invoice cart")
+            .logOnError(errorMessage = "Failed to remove item in invoice cart")
+            .map { InvoiceWithError(it) }
+            .onErrorResume {
+                invoiceRepository.findByWidgetIdAndBoardId(widgetId, boardData.boardId)
+                    .map { invoice ->
+                        InvoiceWithError(invoice, it.message)
                     }
             }
     }
@@ -159,9 +173,9 @@ class InvoiceService(
     fun updatePaymentStatus(
         widgetId: WidgetId,
         paymentRequestBody: PaymentRequestBody,
-        boardAuthenticationData: BoardAuthenticationData,
+        userBoardAuthenticationData: UserBoardAuthenticationData,
     ): Mono<Invoice> {
-        return invoiceRepository.findByWidgetIdAndBoardId(widgetId, boardAuthenticationData.boardId)
+        return invoiceRepository.findByWidgetIdAndBoardId(widgetId, userBoardAuthenticationData.boardId)
             .flatMap {
                 invoiceRepository.save(it.updatePaymentStatus(paymentRequestBody.paid))
             }
