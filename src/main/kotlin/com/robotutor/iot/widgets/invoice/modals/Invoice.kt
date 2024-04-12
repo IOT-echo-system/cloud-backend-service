@@ -78,7 +78,7 @@ data class Invoice(
 
     fun addItem(code: String): Invoice {
         if (this.paid) {
-            throw BadDataException(IOTError.IOT0503)
+            throw BadDataException(IOTError.IOT0504)
         }
         val seedItem = this.seed.find { it.code == code }
         if (seedItem == null) {
@@ -102,7 +102,7 @@ data class Invoice(
 
     fun removeItem(code: String): Invoice {
         if (this.paid) {
-            throw BadDataException(IOTError.IOT0504)
+            throw BadDataException(IOTError.IOT0505)
         }
         val cartItem = this.getCartItem(code)
         if (cartItem == null) {
