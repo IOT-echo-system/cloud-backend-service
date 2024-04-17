@@ -38,12 +38,16 @@ class InvoiceController(private val invoiceService: InvoiceService) {
         @Validated @RequestBody invoiceTitleRequest: InvoiceTitleRequest,
         userBoardAuthenticationData: UserBoardAuthenticationData
     ): Mono<InvoiceView> {
-        return invoiceService.updateInvoiceTitle(widgetId, userBoardAuthenticationData, invoiceTitleRequest).map { InvoiceView.form(it) }
+        return invoiceService.updateInvoiceTitle(widgetId, userBoardAuthenticationData, invoiceTitleRequest)
+            .map { InvoiceView.form(it) }
     }
 
     @RequirePolicy("WIDGET_INVOICE_SEED_UPDATE")
     @GetMapping("/{widgetId}/seed")
-    fun getSeedData(@PathVariable widgetId: WidgetId, userBoardAuthenticationData: UserBoardAuthenticationData): Mono<List<InvoiceSeedDataView>> {
+    fun getSeedData(
+        @PathVariable widgetId: WidgetId,
+        userBoardAuthenticationData: UserBoardAuthenticationData
+    ): Mono<List<InvoiceSeedDataView>> {
         return invoiceService.getSeedData(widgetId, userBoardAuthenticationData)
             .map { invoiceSeedItems ->
                 invoiceSeedItems.map { invoiceSeedItem ->
@@ -59,7 +63,8 @@ class InvoiceController(private val invoiceService: InvoiceService) {
         @Validated @RequestBody seedItemRequest: SeedItemRequest,
         userBoardAuthenticationData: UserBoardAuthenticationData
     ): Mono<InvoiceSeedDataView> {
-        return invoiceService.addSeedData(widgetId, userBoardAuthenticationData, seedItemRequest).map { InvoiceSeedDataView.from(it) }
+        return invoiceService.addSeedData(widgetId, userBoardAuthenticationData, seedItemRequest)
+            .map { InvoiceSeedDataView.from(it) }
     }
 
     @RequirePolicy("WIDGET_INVOICE_SEED_UPDATE")
@@ -120,7 +125,8 @@ class InvoiceController(private val invoiceService: InvoiceService) {
         @PathVariable widgetId: WidgetId,
         @Validated @RequestBody paymentRequestBody: PaymentRequestBody,
         userBoardAuthenticationData: UserBoardAuthenticationData
-    ): Mono<InvoiceState> {
-        return invoiceService.updatePaymentStatus(widgetId, paymentRequestBody, userBoardAuthenticationData).map { InvoiceState.from(it) }
+    ): Mono<InvoiceView> {
+        return invoiceService.updatePaymentStatus(widgetId, paymentRequestBody, userBoardAuthenticationData)
+            .map { InvoiceView.form(it) }
     }
 }
