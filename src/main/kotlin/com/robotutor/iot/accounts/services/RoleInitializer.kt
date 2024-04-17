@@ -16,7 +16,7 @@ class RoleInitializer(private val roleService: RoleService, private val policyIn
                 name = "Owner",
                 createdBy = "System",
                 policies = listOf(
-                    "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17"
+                    "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "20"
                 ).map { policyInitializer.getPolicyId(it) }),
             Role(roleId = "2".padStart(IdType.ROLE_ID.length, '0'),
                 name = "Admin",
@@ -34,7 +34,7 @@ class RoleInitializer(private val roleService: RoleService, private val policyIn
                 name = "Board",
                 createdBy = "System",
                 policies = listOf(
-                    "18", "19", "20"
+                    "18", "19"
                 ).map { policyInitializer.getPolicyId(it) }),
         )
         roles.forEach { role ->
