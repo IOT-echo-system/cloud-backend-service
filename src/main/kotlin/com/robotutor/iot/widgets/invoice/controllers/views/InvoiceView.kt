@@ -18,6 +18,7 @@ data class InvoiceView(
     val cart: List<CartItemView>,
     val totalItems: Int,
     val totalPrice: Double,
+    val paid: Boolean,
     val lastModifiedDate: LocalDateTime
 ) {
     companion object {
@@ -32,6 +33,7 @@ data class InvoiceView(
                 totalItems = invoice.cart.sumOf { it.unit },
                 totalPrice = invoice.cart.sumOf { it.unit * it.pricePerUnit },
                 lastModifiedDate = invoice.lastModifiedDate,
+                paid = invoice.paid
             )
         }
     }
