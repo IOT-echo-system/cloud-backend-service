@@ -12,72 +12,35 @@ class RoleInitializer(private val roleService: RoleService, private val policyIn
     ApplicationRunner {
     override fun run(args: ApplicationArguments?) {
         val roles = listOf(
-            Role(
-                roleId = "1".padStart(IdType.ROLE_ID.length, '0'),
+            Role(roleId = "1".padStart(IdType.ROLE_ID.length, '0'),
                 name = "Owner",
                 createdBy = "System",
                 policies = listOf(
-                    "1",
-                    "2",
-                    "3",
-                    "4",
-                    "5",
-                    "6",
-                    "7",
-                    "8",
-                    "9",
-                    "10",
-                    "11",
-                    "12",
-                    "13",
-                    "14",
-                    "15",
-                    "16",
-                    "17"
-                ).map { policyInitializer.getPolicyId(it) }
-            ),
-            Role(
-                roleId = "2".padStart(IdType.ROLE_ID.length, '0'),
+                    "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17"
+                ).map { policyInitializer.getPolicyId(it) }),
+            Role(roleId = "2".padStart(IdType.ROLE_ID.length, '0'),
                 name = "Admin",
                 createdBy = "System",
                 policies = listOf(
-                    "1",
-                    "2",
-                    "3",
-                    "4",
-                    "5",
-                    "6",
-                    "7",
-                    "8",
-                    "9",
-                    "10",
-                    "11",
-                    "12",
-                    "13",
-                    "14",
-                    "15",
-                    "16"
-                ).map { policyInitializer.getPolicyId(it) }
-            ),
-            Role(
-                roleId = "3".padStart(IdType.ROLE_ID.length, '0'),
+                    "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "20"
+                ).map { policyInitializer.getPolicyId(it) }),
+            Role(roleId = "3".padStart(IdType.ROLE_ID.length, '0'),
                 name = "User",
                 createdBy = "System",
-                policies = listOf("1", "5", "9", "13").map { policyInitializer.getPolicyId(it) }
-            ),
-            Role(
-                roleId = "4".padStart(IdType.ROLE_ID.length, '0'),
+                policies = listOf(
+                    "1", "5", "9", "13", "20"
+                ).map { policyInitializer.getPolicyId(it) }),
+            Role(roleId = "4".padStart(IdType.ROLE_ID.length, '0'),
                 name = "Board",
                 createdBy = "System",
-                policies = listOf("18", "19").map { policyInitializer.getPolicyId(it) }
-            ),
+                policies = listOf(
+                    "18", "19", "20"
+                ).map { policyInitializer.getPolicyId(it) }),
         )
         roles.forEach { role ->
-            roleService.getRoleByRoleId(role.roleId)
-                .switchIfEmpty {
-                    roleService.addRole(name = role.name, createdBy = role.createdBy, policies = role.policies)
-                }
-                .block()
+            roleService.getRoleByRoleId(role.roleId).switchIfEmpty {
+                roleService.addRole(name = role.name, createdBy = role.createdBy, policies = role.policies)
+            }.block()
         }
 
     }
