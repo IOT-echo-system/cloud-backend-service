@@ -1,13 +1,14 @@
 package com.robotutor.iot.widgets.controllers
 
 import com.robotutor.iot.utils.filters.annotations.RequirePolicy
+import com.robotutor.iot.utils.models.UserBoardAuthenticationData
+import com.robotutor.iot.widgets.controllers.views.WidgetTitleRequest
 import com.robotutor.iot.widgets.controllers.views.WidgetView
 import com.robotutor.iot.widgets.services.WidgetService
-import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RequestParam
-import org.springframework.web.bind.annotation.RestController
+import org.springframework.validation.annotation.Validated
+import org.springframework.web.bind.annotation.*
 import reactor.core.publisher.Flux
+import reactor.core.publisher.Mono
 
 @RestController
 @RequestMapping("/widgets")
@@ -17,6 +18,18 @@ class WidgetController(private val widgetService: WidgetService) {
     @GetMapping
     fun getWidgets(@RequestParam boardIds: List<String>): Flux<WidgetView> {
         return widgetService.getWidgets(boardIds).map { WidgetView.from(it) }
+    }
+
+    @RequirePolicy("WIDGET_UPDATE")
+    @PutMapping("/{foreignWidgetId}/title")
+    fun updateTitle(
+        @PathVariable foreignWidgetId: String,
+        @Validated @RequestBody widgetTitleRequest: WidgetTitleRequest,
+        userBoardAuthenticationData: UserBoardAuthenticationData
+    ): Mono<WidgetView> {
+        println("update title request")
+        return widgetService.updateTitle(foreignWidgetId, widgetTitleRequest, userBoardAuthenticationData)
+            .map { WidgetView.from(it) }
     }
 
 }

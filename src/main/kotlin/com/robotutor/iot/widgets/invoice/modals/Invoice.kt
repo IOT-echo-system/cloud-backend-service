@@ -28,7 +28,6 @@ data class Invoice(
     val widgetId: WidgetId,
     val boardId: String,
     val accountId: String,
-    var title: String = "Invoice",
     val widgetType: WidgetType = WidgetType.INVOICE,
     val seed: MutableList<InvoiceSeedItem> = mutableListOf(),
     val cart: MutableList<CartItem> = mutableListOf(),
@@ -37,11 +36,6 @@ data class Invoice(
     @LastModifiedDate
     val lastModifiedDate: LocalDateTime = LocalDateTime.now(),
 ) {
-    fun updateTitle(title: String): Invoice {
-        this.title = title
-        return this
-    }
-
     fun addSeedItem(seedItemRequest: SeedItemRequest): Invoice {
         if (this.seed.any { it.code == seedItemRequest.code }) {
             throw DuplicateDataException(IOTError.IOT0501)

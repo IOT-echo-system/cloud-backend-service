@@ -13,7 +13,6 @@ data class InvoiceView(
     val widgetId: WidgetId,
     val boardId: String,
     val projectId: String,
-    val title: String,
     val widgetType: WidgetType,
     val cart: List<CartItemView>,
     val totalItems: Int,
@@ -26,7 +25,6 @@ data class InvoiceView(
             return InvoiceView(
                 widgetId = invoice.widgetId,
                 boardId = invoice.boardId,
-                title = invoice.title,
                 projectId = invoice.accountId,
                 widgetType = invoice.widgetType,
                 cart = invoice.cart.map { CartItemView.from(it) },
@@ -70,12 +68,6 @@ data class InvoiceSeedDataView(val code: String, val name: String, val pricePerU
         }
     }
 }
-
-
-data class InvoiceTitleRequest(
-    @field:Size(min = 4, max = 30, message = "Invoice title should not be less than 4 char or more than 30 char")
-    val name: String
-)
 
 data class SeedItemRequest(
     @field:Size(min = 1, max = 12, message = "Seed item code should not be less than 1 char or more than 12 char")

@@ -13,7 +13,6 @@ import com.robotutor.iot.utils.services.IdGeneratorService
 import com.robotutor.iot.webClient.WebClientWrapper
 import com.robotutor.iot.widgets.config.NodeBffGatewayConfig
 import com.robotutor.iot.widgets.invoice.controllers.views.InvoiceState
-import com.robotutor.iot.widgets.invoice.controllers.views.InvoiceTitleRequest
 import com.robotutor.iot.widgets.invoice.controllers.views.PaymentRequestBody
 import com.robotutor.iot.widgets.invoice.controllers.views.SeedItemRequest
 import com.robotutor.iot.widgets.invoice.modals.Invoice
@@ -59,21 +58,6 @@ class InvoiceService(
 
     fun getInvoices(userAuthenticationData: UserAuthenticationData, widgetIds: List<WidgetId>): Flux<Invoice> {
         return invoiceRepository.findAllByWidgetIdInAndAccountId(widgetIds, userAuthenticationData.accountId)
-    }
-
-    fun updateInvoiceTitle(
-        widgetId: WidgetId,
-        userBoardAuthenticationData: UserBoardAuthenticationData,
-        invoiceTitleRequest: InvoiceTitleRequest
-    ): Mono<Invoice> {
-        return invoiceRepository.findByWidgetIdAndBoardId(widgetId, userBoardAuthenticationData.boardId)
-            .flatMap {
-                invoiceRepository.save(it.updateTitle(invoiceTitleRequest.name))
-                    .auditOnSuccess(mqttPublisher, AuditEvent.UPDATE_WIDGET_TITLE)
-                    .auditOnError(mqttPublisher, AuditEvent.UPDATE_WIDGET_TITLE)
-                    .logOnSuccess(message = "Successfully updated invoice widget title")
-                    .logOnError(errorMessage = "Failed to update invoice widget title")
-            }
     }
 
     fun getSeedData(widgetId: WidgetId, userBoardAuthenticationData: UserBoardAuthenticationData): Mono<List<InvoiceSeedItem>> {

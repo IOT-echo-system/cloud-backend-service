@@ -31,16 +31,6 @@ class InvoiceController(private val invoiceService: InvoiceService) {
         return invoiceService.getInvoices(userAuthenticationData, widgetIds).map { InvoiceView.form(it) }
     }
 
-    @RequirePolicy("WIDGET_INVOICE_UPDATE")
-    @PutMapping("/{widgetId}/title")
-    fun updateInvoiceTitle(
-        @PathVariable widgetId: WidgetId,
-        @Validated @RequestBody invoiceTitleRequest: InvoiceTitleRequest,
-        userBoardAuthenticationData: UserBoardAuthenticationData
-    ): Mono<InvoiceView> {
-        return invoiceService.updateInvoiceTitle(widgetId, userBoardAuthenticationData, invoiceTitleRequest)
-            .map { InvoiceView.form(it) }
-    }
 
     @RequirePolicy("WIDGET_INVOICE_SEED_UPDATE")
     @GetMapping("/{widgetId}/seed")

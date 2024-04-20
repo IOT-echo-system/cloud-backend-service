@@ -22,8 +22,14 @@ data class Widget(
     val widgetType: WidgetType,
     val accountId: String,
     val boardId: String,
+    var title: String = "Widget",
     val createdAt: LocalDateTime = LocalDateTime.now()
 ) {
+    fun updateTitle(name: String): Widget {
+        this.title = name
+        return this
+    }
+
     companion object {
         fun from(
             widgetId: WidgetId,
