@@ -11,5 +11,5 @@ import reactor.core.publisher.Mono
 @Repository
 interface WidgetRepository : ReactiveCrudRepository<Widget, WidgetId> {
     fun findAllByBoardIdIn(boardId: List<BoardId>): Flux<Widget>
-    fun findByForeignWidgetIdAndBoardId(widgetId: WidgetId, boardId: BoardId): Mono<Widget>
+    fun findByWidgetIdAndBoardId(widgetId: WidgetId, boardId: BoardId): Mono<Widget>
 }

@@ -23,7 +23,7 @@ data class WidgetView(
     companion object {
         fun from(widget: Widget): WidgetView {
             return WidgetView(
-                widgetId = widget.foreignWidgetId,
+                widgetId = widget.widgetId,
                 widgetType = widget.widgetType,
                 projectId = widget.accountId,
                 boardId = widget.boardId,

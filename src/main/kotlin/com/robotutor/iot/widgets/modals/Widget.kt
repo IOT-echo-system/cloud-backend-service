@@ -18,11 +18,10 @@ data class Widget(
     var id: ObjectId? = null,
     @Indexed(unique = true)
     val widgetId: WidgetId,
-    val foreignWidgetId: WidgetId,
     val widgetType: WidgetType,
     val accountId: String,
     val boardId: String,
-    var title: String = "Widget",
+    var title: String,
     val createdAt: LocalDateTime = LocalDateTime.now()
 ) {
     fun updateTitle(name: String): Widget {
@@ -33,24 +32,25 @@ data class Widget(
     companion object {
         fun from(
             widgetId: WidgetId,
-            foreignWidgetId: WidgetId,
             accountId: String,
             boardId: String,
-            widgetType: WidgetType
+            widgetType: WidgetType,
+            name: String
         ): Widget {
             return Widget(
                 widgetId = widgetId,
-                foreignWidgetId = foreignWidgetId,
                 widgetType = widgetType,
                 accountId = accountId,
-                boardId = boardId
+                boardId = boardId,
+                title = name
             )
         }
     }
 }
 
 enum class WidgetType {
-    INVOICE
+    INVOICE,
+    COLLECTION_OF_BUTTONS
 }
 
 typealias WidgetId = String

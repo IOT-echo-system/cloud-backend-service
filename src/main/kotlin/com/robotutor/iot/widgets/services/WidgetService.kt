@@ -28,17 +28,18 @@ class WidgetService(
         foreignWidgetId: WidgetId,
         accountId: String,
         boardId: String,
-        widgetType: WidgetType
+        widgetType: WidgetType,
+        name: String
     ): Mono<Widget> {
         return idGeneratorService.generateId(IdType.WIDGET_ID)
             .flatMap { widgetId ->
                 widgetRepository.save(
                     Widget.from(
                         widgetId = widgetId,
-                        foreignWidgetId = foreignWidgetId,
                         accountId = accountId,
                         boardId = boardId,
-                        widgetType = widgetType
+                        widgetType = widgetType,
+                        name = name
                     )
                 )
             }
@@ -49,11 +50,11 @@ class WidgetService(
     }
 
     fun updateTitle(
-        foreignWidgetId: WidgetId,
+        widgetId: WidgetId,
         widgetTitleRequest: WidgetTitleRequest,
         userBoardAuthenticationData: UserBoardAuthenticationData
     ): Mono<Widget> {
-        return widgetRepository.findByForeignWidgetIdAndBoardId(foreignWidgetId, userBoardAuthenticationData.boardId)
+        return widgetRepository.findByWidgetIdAndBoardId(widgetId, userBoardAuthenticationData.boardId)
             .map { it.updateTitle(widgetTitleRequest.name) }
             .flatMap { widgetRepository.save(it) }
             .auditOnSuccess(mqttPublisher, AuditEvent.UPDATE_WIDGET_TITLE)

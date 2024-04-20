@@ -6,6 +6,7 @@ import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.ControllerAdvice
 import org.springframework.web.bind.annotation.ExceptionHandler
 import org.springframework.web.bind.support.WebExchangeBindException
+import org.springframework.web.server.ResponseStatusException
 import org.springframework.web.server.ServerWebInputException
 
 @ControllerAdvice
@@ -54,10 +55,15 @@ class ApiExceptionHandler {
             .body(ErrorResponse(errorCode = "IOT-0002", message = ex.reason ?: ""))
     }
 
+    @ExceptionHandler(ResponseStatusException::class)
+    fun handleNoHandlerFoundException(ex: ResponseStatusException): ResponseEntity<ErrorResponse> {
+        return ResponseEntity.status(ex.statusCode).body(ErrorResponse(errorCode = "IOT-0003", message = ex.message))
+    }
+
     @ExceptionHandler(Exception::class)
     fun handleException(ex: Exception): ResponseEntity<ErrorResponse> {
         ex.printStackTrace()
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-            .body(ErrorResponse(errorCode = "IOT-0003", message = "Internal Server Error"))
+            .body(ErrorResponse(errorCode = "IOT-0004", message = "Internal Server Error"))
     }
 }

@@ -38,13 +38,14 @@ class InvoiceService(
     private val nodeBffGatewayConfig: NodeBffGatewayConfig
 ) {
     fun addInvoice(userBoardAuthenticationData: UserBoardAuthenticationData): Mono<Invoice> {
-        return idGeneratorService.generateId(IdType.INVOICE_ID)
+        return idGeneratorService.generateId(IdType.WIDGET_ID)
             .flatMap { invoiceId ->
                 widgetService.addWidget(
                     foreignWidgetId = invoiceId,
                     accountId = userBoardAuthenticationData.accountId,
                     boardId = userBoardAuthenticationData.boardId,
-                    widgetType = WidgetType.INVOICE
+                    widgetType = WidgetType.INVOICE,
+                    name = "Invoice $invoiceId"
                 )
             }
             .flatMap {
@@ -60,12 +61,19 @@ class InvoiceService(
         return invoiceRepository.findAllByWidgetIdInAndAccountId(widgetIds, userAuthenticationData.accountId)
     }
 
-    fun getSeedData(widgetId: WidgetId, userBoardAuthenticationData: UserBoardAuthenticationData): Mono<List<InvoiceSeedItem>> {
+    fun getSeedData(
+        widgetId: WidgetId,
+        userBoardAuthenticationData: UserBoardAuthenticationData
+    ): Mono<List<InvoiceSeedItem>> {
         return invoiceRepository.findByWidgetIdAndBoardId(widgetId, userBoardAuthenticationData.boardId)
             .map { it.seed }
     }
 
-    fun addSeedData(widgetId: WidgetId, userBoardAuthenticationData: UserBoardAuthenticationData, seedItemRequest: SeedItemRequest): Mono<InvoiceSeedItem> {
+    fun addSeedData(
+        widgetId: WidgetId,
+        userBoardAuthenticationData: UserBoardAuthenticationData,
+        seedItemRequest: SeedItemRequest
+    ): Mono<InvoiceSeedItem> {
         return invoiceRepository.findByWidgetIdAndBoardId(widgetId, userBoardAuthenticationData.boardId)
             .flatMap {
                 invoiceRepository.save(it.addSeedItem(seedItemRequest))

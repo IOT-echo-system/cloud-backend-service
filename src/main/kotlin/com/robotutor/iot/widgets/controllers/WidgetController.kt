@@ -21,14 +21,14 @@ class WidgetController(private val widgetService: WidgetService) {
     }
 
     @RequirePolicy("WIDGET_UPDATE")
-    @PutMapping("/{foreignWidgetId}/title")
+    @PutMapping("/{widgetId}/title")
     fun updateTitle(
-        @PathVariable foreignWidgetId: String,
+        @PathVariable widgetId: String,
         @Validated @RequestBody widgetTitleRequest: WidgetTitleRequest,
         userBoardAuthenticationData: UserBoardAuthenticationData
     ): Mono<WidgetView> {
         println("update title request")
-        return widgetService.updateTitle(foreignWidgetId, widgetTitleRequest, userBoardAuthenticationData)
+        return widgetService.updateTitle(widgetId, widgetTitleRequest, userBoardAuthenticationData)
             .map { WidgetView.from(it) }
     }
 
