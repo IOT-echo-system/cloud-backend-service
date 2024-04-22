@@ -10,8 +10,7 @@ import com.robotutor.iot.utils.models.BoardAuthenticationData
 import com.robotutor.iot.utils.models.UserAuthenticationData
 import com.robotutor.iot.utils.models.UserBoardAuthenticationData
 import com.robotutor.iot.utils.services.IdGeneratorService
-import com.robotutor.iot.webClient.WebClientWrapper
-import com.robotutor.iot.widgets.config.NodeBffGatewayConfig
+import com.robotutor.iot.widgets.gateway.NodeBffGateway
 import com.robotutor.iot.widgets.invoice.controllers.views.InvoiceState
 import com.robotutor.iot.widgets.invoice.controllers.views.PaymentRequestBody
 import com.robotutor.iot.widgets.invoice.controllers.views.SeedItemRequest
@@ -20,6 +19,7 @@ import com.robotutor.iot.widgets.invoice.modals.InvoiceSeedItem
 import com.robotutor.iot.widgets.invoice.modals.InvoiceWithError
 import com.robotutor.iot.widgets.invoice.repositories.InvoiceRepository
 import com.robotutor.iot.widgets.modals.IdType
+import com.robotutor.iot.widgets.modals.Widget
 import com.robotutor.iot.widgets.modals.WidgetId
 import com.robotutor.iot.widgets.modals.WidgetType
 import com.robotutor.iot.widgets.services.WidgetService
@@ -34,8 +34,7 @@ class InvoiceService(
     private val idGeneratorService: IdGeneratorService,
     private val widgetService: WidgetService,
     private val mqttPublisher: MqttPublisher,
-    private val webClientWrapper: WebClientWrapper,
-    private val nodeBffGatewayConfig: NodeBffGatewayConfig
+    private val nodeBffGateway: NodeBffGateway
 ) {
     fun addInvoice(userBoardAuthenticationData: UserBoardAuthenticationData): Mono<Invoice> {
         return idGeneratorService.generateId(IdType.WIDGET_ID)
@@ -176,18 +175,13 @@ class InvoiceService(
             .logOnSuccess(message = "Successfully updated invoice payment")
             .logOnError(errorMessage = "Failed to update invoice payment")
             .flatMap { invoice ->
-                webClientWrapper.post(
-                    baseUrl = nodeBffGatewayConfig.baseUrl,
-                    path = "/widgets/invoices/{invoiceId}/state",
-                    body = InvoiceState.from(invoice),
-                    uriVariables = mapOf("invoiceId" to invoice.widgetId),
-                    headers = mapOf(
-                        "boardId" to invoice.boardId,
-                        "widgetName" to invoice.widgetType.toString(),
-                        "widgetId" to invoice.widgetId
-                    ),
-                    returnType = String::class.java
+                val widget = Widget(
+                    widgetId = invoice.widgetId,
+                    widgetType = WidgetType.INVOICE,
+                    accountId = invoice.accountId,
+                    boardId = invoice.boardId
                 )
+                nodeBffGateway.updateInvoicePaymentStatus(widget, InvoiceState.from(invoice))
                     .map { invoice }
             }
     }

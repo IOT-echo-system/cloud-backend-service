@@ -4,6 +4,7 @@ import com.robotutor.iot.utils.filters.annotations.RequirePolicy
 import com.robotutor.iot.utils.models.UserAuthenticationData
 import com.robotutor.iot.utils.models.UserBoardAuthenticationData
 import com.robotutor.iot.widgets.collectionOfButtons.controllers.views.AddButtonRequest
+import com.robotutor.iot.widgets.collectionOfButtons.controllers.views.ButtonValueRequest
 import com.robotutor.iot.widgets.collectionOfButtons.controllers.views.CollectionOfButtonsView
 import com.robotutor.iot.widgets.collectionOfButtons.services.CollectionOfButtonsService
 import com.robotutor.iot.widgets.modals.WidgetId
@@ -45,77 +46,42 @@ class CollectionOfButtonsController(private val collectionOfButtonsService: Coll
             .map { CollectionOfButtonsView.form(it) }
     }
 
-//    @RequirePolicy("WIDGET_INVOICE_SEED_UPDATE")
-//    @PostMapping("/{widgetId}/seed")
-//    fun addSeedData(
-//        @PathVariable widgetId: WidgetId,
-//        @Validated @RequestBody seedItemRequest: SeedItemRequest,
-//        userBoardAuthenticationData: UserBoardAuthenticationData
-//    ): Mono<InvoiceSeedDataView> {
-//        return invoiceService.addSeedData(widgetId, userBoardAuthenticationData, seedItemRequest)
-//            .map { InvoiceSeedDataView.from(it) }
-//    }
-//
-//    @RequirePolicy("WIDGET_INVOICE_SEED_UPDATE")
-//    @PutMapping("/{widgetId}/seed/{seedCode}")
-//    fun updateSeedData(
-//        @PathVariable widgetId: WidgetId,
-//        @PathVariable seedCode: String,
-//        @Validated @RequestBody seedItemRequest: SeedItemRequest,
-//        userBoardAuthenticationData: UserBoardAuthenticationData
-//    ): Mono<InvoiceSeedDataView> {
-//        return invoiceService.updateSeedData(widgetId, seedCode, seedItemRequest, userBoardAuthenticationData)
-//            .map { InvoiceSeedDataView.from(it) }
-//    }
-//
-//    @RequirePolicy("WIDGET_INVOICE_ITEM_UPDATE")
-//    @PutMapping("/{widgetId}/items/reset")
-//    fun resetItems(
-//        @PathVariable widgetId: WidgetId,
-//        boardAuthenticationData: BoardAuthenticationData
-//    ): Mono<InvoiceState> {
-//        return invoiceService.resetItems(widgetId, boardAuthenticationData).map { InvoiceState.from(it) }
-//    }
-//
-//    @RequirePolicy("WIDGET_INVOICE_ITEM_UPDATE")
-//    @PostMapping("/{widgetId}/items/{code}")
-//    fun addItem(
-//        @PathVariable widgetId: WidgetId,
-//        @PathVariable code: String,
-//        boardAuthenticationData: BoardAuthenticationData
-//    ): Mono<InvoiceState> {
-//        return invoiceService.addItem(widgetId, code, boardAuthenticationData)
-//            .map { InvoiceState.from(it.invoice, it.error) }
-//    }
-//
-//    @RequirePolicy("WIDGET_INVOICE_ITEM_UPDATE")
-//    @DeleteMapping("/{widgetId}/items/{code}")
-//    fun removeItem(
-//        @PathVariable widgetId: WidgetId,
-//        @PathVariable code: String,
-//        boardAuthenticationData: BoardAuthenticationData
-//    ): Mono<InvoiceState> {
-//        return invoiceService.removeItem(widgetId, code, boardAuthenticationData)
-//            .map { InvoiceState.from(it.invoice, it.error) }
-//    }
-//
-//    @RequirePolicy("WIDGET_INVOICE_ITEM_UPDATE")
-//    @GetMapping("/{widgetId}/state")
-//    fun getInvoiceState(
-//        @PathVariable widgetId: WidgetId,
-//        boardAuthenticationData: BoardAuthenticationData
-//    ): Mono<InvoiceState> {
-//        return invoiceService.getInvoice(widgetId, boardAuthenticationData).map { InvoiceState.from(it) }
-//    }
-//
-//    @RequirePolicy("WIDGET_INVOICE_PAYMENT_UPDATE")
-//    @PutMapping("/{widgetId}/payment")
-//    fun updatePaymentState(
-//        @PathVariable widgetId: WidgetId,
-//        @Validated @RequestBody paymentRequestBody: PaymentRequestBody,
-//        userBoardAuthenticationData: UserBoardAuthenticationData
-//    ): Mono<InvoiceView> {
-//        return invoiceService.updatePaymentStatus(widgetId, paymentRequestBody, userBoardAuthenticationData)
-//            .map { InvoiceView.form(it) }
-//    }
+    @RequirePolicy("WIDGET_COLLECTION_OF_BUTTONS_UPDATE")
+    @PutMapping("/{widgetId}/buttons/{buttonId}")
+    fun updateButton(
+        @PathVariable widgetId: WidgetId,
+        @PathVariable buttonId: String,
+        @Validated @RequestBody addButtonRequest: AddButtonRequest,
+        userBoardAuthenticationData: UserBoardAuthenticationData
+    ): Mono<CollectionOfButtonsView> {
+        return collectionOfButtonsService.updateButton(
+            widgetId,
+            buttonId,
+            addButtonRequest,
+            userBoardAuthenticationData
+        ).map { CollectionOfButtonsView.form(it) }
+    }
+
+    @RequirePolicy("WIDGET_COLLECTION_OF_BUTTONS_UPDATE")
+    @DeleteMapping("/{widgetId}/buttons/{buttonId}")
+    fun deleteButton(
+        @PathVariable widgetId: WidgetId,
+        @PathVariable buttonId: String,
+        userBoardAuthenticationData: UserBoardAuthenticationData
+    ): Mono<CollectionOfButtonsView> {
+        return collectionOfButtonsService.deleteButton(widgetId, buttonId, userBoardAuthenticationData)
+            .map { CollectionOfButtonsView.form(it) }
+    }
+
+    @RequirePolicy("WIDGET_COLLECTION_OF_BUTTONS_UPDATE")
+    @PutMapping("/{widgetId}/buttons/{buttonId}/value")
+    fun updateButtonValue(
+        @PathVariable widgetId: WidgetId,
+        @PathVariable buttonId: String,
+        @Validated @RequestBody buttonValueRequest: ButtonValueRequest,
+        userBoardAuthenticationData: UserBoardAuthenticationData
+    ): Mono<CollectionOfButtonsView> {
+        return collectionOfButtonsService.updateButtonValue(widgetId, buttonId, buttonValueRequest.value, userBoardAuthenticationData)
+            .map { CollectionOfButtonsView.form(it) }
+    }
 }

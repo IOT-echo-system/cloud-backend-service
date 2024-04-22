@@ -10,5 +10,10 @@ data class AddButtonRequest(
     val type: ButtonType,
     val mode: ButtonMode,
     val min: Int = 0,
-    val max: Int = 1
+    val max: Int = 1,
+    val symbol: String? = null
+)
+
+data class ButtonValueRequest(
+    val value: Int
 )

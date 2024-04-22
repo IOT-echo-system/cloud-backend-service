@@ -9,12 +9,13 @@ import com.robotutor.iot.utils.audit.auditOnSuccess
 import com.robotutor.iot.utils.models.UserAuthenticationData
 import com.robotutor.iot.utils.models.UserBoardAuthenticationData
 import com.robotutor.iot.utils.services.IdGeneratorService
-import com.robotutor.iot.webClient.WebClientWrapper
 import com.robotutor.iot.widgets.collectionOfButtons.controllers.views.AddButtonRequest
+import com.robotutor.iot.widgets.collectionOfButtons.controllers.views.ButtonState
 import com.robotutor.iot.widgets.collectionOfButtons.modals.CollectionOfButtons
 import com.robotutor.iot.widgets.collectionOfButtons.repositories.CollectionOfButtonsRepository
-import com.robotutor.iot.widgets.config.NodeBffGatewayConfig
+import com.robotutor.iot.widgets.gateway.NodeBffGateway
 import com.robotutor.iot.widgets.modals.IdType
+import com.robotutor.iot.widgets.modals.Widget
 import com.robotutor.iot.widgets.modals.WidgetId
 import com.robotutor.iot.widgets.modals.WidgetType
 import com.robotutor.iot.widgets.services.WidgetService
@@ -28,8 +29,7 @@ class CollectionOfButtonsService(
     private val idGeneratorService: IdGeneratorService,
     private val widgetService: WidgetService,
     private val mqttPublisher: MqttPublisher,
-    private val webClientWrapper: WebClientWrapper,
-    private val nodeBffGatewayConfig: NodeBffGatewayConfig
+    private val nodeBffGateway: NodeBffGateway
 ) {
 
     fun addCollectionOfButtons(userBoardAuthenticationData: UserBoardAuthenticationData): Mono<CollectionOfButtons> {
@@ -81,6 +81,70 @@ class CollectionOfButtonsService(
             .logOnSuccess(message = "Successfully added button in Collection of buttons widget")
             .logOnError(errorMessage = "Failed to add button in Collection of buttons widget")
 
+    }
+
+    fun updateButton(
+        widgetId: WidgetId,
+        buttonId: String,
+        addButtonRequest: AddButtonRequest,
+        userBoardAuthenticationData: UserBoardAuthenticationData
+    ): Mono<CollectionOfButtons> {
+        return collectionOfButtonsRepository.findAllByWidgetIdAndAccountId(
+            widgetId,
+            userBoardAuthenticationData.accountId
+        )
+            .map { it.updateButton(buttonId, addButtonRequest) }
+            .flatMap { collectionOfButtonsRepository.save(it) }
+            .auditOnSuccess(mqttPublisher, AuditEvent.COLLECTION_OF_BUTTONS_UPDATE_BUTTON)
+            .auditOnError(mqttPublisher, AuditEvent.COLLECTION_OF_BUTTONS_UPDATE_BUTTON)
+            .logOnSuccess(message = "Successfully updated button in Collection of buttons widget")
+            .logOnError(errorMessage = "Failed to update button in Collection of buttons widget")
+    }
+
+    fun deleteButton(
+        widgetId: WidgetId,
+        buttonId: String,
+        userBoardAuthenticationData: UserBoardAuthenticationData
+    ): Mono<CollectionOfButtons> {
+        return collectionOfButtonsRepository.findAllByWidgetIdAndAccountId(
+            widgetId,
+            userBoardAuthenticationData.accountId
+        )
+            .map { it.deleteButton(buttonId) }
+            .flatMap { collectionOfButtonsRepository.save(it) }
+            .auditOnSuccess(mqttPublisher, AuditEvent.COLLECTION_OF_BUTTONS_DELETE_BUTTON)
+            .auditOnError(mqttPublisher, AuditEvent.COLLECTION_OF_BUTTONS_DELETE_BUTTON)
+            .logOnSuccess(message = "Successfully deleted button in Collection of buttons widget")
+            .logOnError(errorMessage = "Failed to delete button in Collection of buttons widget")
+    }
+
+    fun updateButtonValue(
+        widgetId: WidgetId,
+        buttonId: String,
+        value: Int,
+        userBoardAuthenticationData: UserBoardAuthenticationData
+    ): Mono<CollectionOfButtons> {
+        return collectionOfButtonsRepository.findAllByWidgetIdAndAccountId(
+            widgetId,
+            userBoardAuthenticationData.accountId
+        )
+            .map { it.updateButtonValue(buttonId, value) }
+            .flatMap { collectionOfButtonsRepository.save(it) }
+            .flatMap { collectionOfButtons ->
+                val widget = Widget(
+                    widgetId = collectionOfButtons.widgetId,
+                    widgetType = WidgetType.COLLECTION_OF_BUTTONS,
+                    accountId = collectionOfButtons.accountId,
+                    boardId = collectionOfButtons.boardId
+                )
+                val buttonState = ButtonState.from(collectionOfButtons, buttonId)
+                nodeBffGateway.updateCollectionOfButtonsButtonStatus(widget, buttonState)
+                    .map { collectionOfButtons }
+            }
+            .auditOnSuccess(mqttPublisher, AuditEvent.COLLECTION_OF_BUTTONS_UPDATE_BUTTON_VALUE)
+            .auditOnError(mqttPublisher, AuditEvent.COLLECTION_OF_BUTTONS_UPDATE_BUTTON_VALUE)
+            .logOnSuccess(message = "Successfully updated button value in Collection of buttons widget")
+            .logOnError(errorMessage = "Failed to update button value in Collection of buttons widget")
     }
 
 }

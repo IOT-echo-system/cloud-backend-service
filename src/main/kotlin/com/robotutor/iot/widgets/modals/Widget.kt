@@ -21,7 +21,7 @@ data class Widget(
     val widgetType: WidgetType,
     val accountId: String,
     val boardId: String,
-    var title: String,
+    var title: String = "",
     val createdAt: LocalDateTime = LocalDateTime.now()
 ) {
     fun updateTitle(name: String): Widget {
@@ -52,5 +52,7 @@ enum class WidgetType {
     INVOICE,
     COLLECTION_OF_BUTTONS
 }
+
+open class WidgetState
 
 typealias WidgetId = String

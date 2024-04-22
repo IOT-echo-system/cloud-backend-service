@@ -1,6 +1,8 @@
 package com.robotutor.iot.widgets.collectionOfButtons.modals
 
+import com.robotutor.iot.utils.exceptions.DataNotFoundException
 import com.robotutor.iot.widgets.collectionOfButtons.controllers.views.AddButtonRequest
+import com.robotutor.iot.widgets.exceptions.IOTError
 import com.robotutor.iot.widgets.modals.WidgetId
 import com.robotutor.iot.widgets.modals.WidgetType
 import org.bson.types.ObjectId
@@ -39,9 +41,33 @@ data class CollectionOfButtons(
             mode = addButtonRequest.mode,
             min = addButtonRequest.min,
             max = addButtonRequest.max,
-            value = 0
+            value = 0,
+            symbol = addButtonRequest.symbol
         )
         this.buttons.add(button)
+        return this
+    }
+
+    fun updateButton(buttonId: String, addButtonRequest: AddButtonRequest): CollectionOfButtons {
+        val button = this.buttons.find { it.buttonId == buttonId }
+        if (button == null) {
+            throw DataNotFoundException(IOTError.IOT0506)
+        }
+        button.update(addButtonRequest)
+        return this
+    }
+
+    fun deleteButton(buttonId: String): CollectionOfButtons {
+        this.buttons.removeIf { it.buttonId == buttonId }
+        return this
+    }
+
+    fun updateButtonValue(buttonId: String, value: Int): CollectionOfButtons {
+        val button = this.buttons.find { it.buttonId == buttonId }
+        if (button == null) {
+            throw DataNotFoundException(IOTError.IOT0506)
+        }
+        button.updateValue(value)
         return this
     }
 
@@ -58,13 +84,29 @@ data class CollectionOfButtons(
 
 data class Button(
     val buttonId: String,
-    val name: String,
-    val type: ButtonType,
-    val mode: ButtonMode,
-    val min: Int = 0,
-    val max: Int = 1,
-    val value: Int = 0,
-)
+    var name: String,
+    var type: ButtonType,
+    var mode: ButtonMode,
+    var min: Int = 0,
+    var max: Int = 1,
+    var value: Int = 0,
+    var symbol: String? = null,
+) {
+    fun update(addButtonRequest: AddButtonRequest): Button {
+        this.name = addButtonRequest.name.trim()
+        this.mode = addButtonRequest.mode
+        this.type = addButtonRequest.type
+        this.min = addButtonRequest.min
+        this.max = addButtonRequest.max
+        this.symbol = addButtonRequest.symbol
+        return this
+    }
+
+    fun updateValue(value: Int): Button {
+        this.value = value
+        return this
+    }
+}
 
 enum class ButtonMode {
     INPUT,
