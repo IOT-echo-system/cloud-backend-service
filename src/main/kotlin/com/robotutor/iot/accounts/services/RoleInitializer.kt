@@ -75,7 +75,7 @@ class RoleInitializer(private val roleService: RoleService, private val policyIn
                 name = "Board",
                 createdBy = "System",
                 policies = listOf(
-                    "18", "19"
+                    "18", "19", "25"
                 ).map { policyInitializer.getPolicyId(it) }),
         )
         roles.forEach { role ->

@@ -10,5 +10,5 @@ import reactor.core.publisher.Mono
 @Repository
 interface CollectionOfButtonsRepository : ReactiveCrudRepository<CollectionOfButtons, WidgetId> {
     fun findAllByWidgetIdInAndAccountId(widgetId: List<WidgetId>, accountId: String): Flux<CollectionOfButtons>
-    fun findAllByWidgetIdAndAccountId(widgetId: WidgetId, accountId: String): Mono<CollectionOfButtons>
+    fun findByWidgetIdAndAccountId(widgetId: WidgetId, accountId: String): Mono<CollectionOfButtons>
 }

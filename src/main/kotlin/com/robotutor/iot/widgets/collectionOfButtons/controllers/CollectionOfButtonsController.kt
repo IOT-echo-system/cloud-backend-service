@@ -1,6 +1,7 @@
 package com.robotutor.iot.widgets.collectionOfButtons.controllers
 
 import com.robotutor.iot.utils.filters.annotations.RequirePolicy
+import com.robotutor.iot.utils.models.BoardAuthenticationData
 import com.robotutor.iot.utils.models.UserAuthenticationData
 import com.robotutor.iot.utils.models.UserBoardAuthenticationData
 import com.robotutor.iot.widgets.collectionOfButtons.controllers.views.AddButtonRequest
@@ -81,7 +82,29 @@ class CollectionOfButtonsController(private val collectionOfButtonsService: Coll
         @Validated @RequestBody buttonValueRequest: ButtonValueRequest,
         userBoardAuthenticationData: UserBoardAuthenticationData
     ): Mono<CollectionOfButtonsView> {
-        return collectionOfButtonsService.updateButtonValue(widgetId, buttonId, buttonValueRequest.value, userBoardAuthenticationData)
+        return collectionOfButtonsService.updateButtonValue(
+            widgetId,
+            buttonId,
+            buttonValueRequest.value,
+            userBoardAuthenticationData
+        )
+            .map { CollectionOfButtonsView.form(it) }
+    }
+
+    @RequirePolicy("WIDGET_COLLECTION_OF_BUTTONS_UPDATE_SENSOR_VALUE")
+    @PutMapping("/{widgetId}/sensors/{buttonId}/value")
+    fun updateSensorValue(
+        @PathVariable widgetId: WidgetId,
+        @PathVariable buttonId: String,
+        @Validated @RequestBody buttonValueRequest: ButtonValueRequest,
+        boardAuthenticationData: BoardAuthenticationData
+    ): Mono<CollectionOfButtonsView> {
+        return collectionOfButtonsService.updateSensorValue(
+            widgetId,
+            buttonId,
+            buttonValueRequest.value,
+            boardAuthenticationData
+        )
             .map { CollectionOfButtonsView.form(it) }
     }
 }

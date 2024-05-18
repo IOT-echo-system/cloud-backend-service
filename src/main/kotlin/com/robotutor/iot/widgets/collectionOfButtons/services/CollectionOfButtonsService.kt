@@ -6,6 +6,7 @@ import com.robotutor.iot.mqtt.models.AuditEvent
 import com.robotutor.iot.mqtt.services.MqttPublisher
 import com.robotutor.iot.utils.audit.auditOnError
 import com.robotutor.iot.utils.audit.auditOnSuccess
+import com.robotutor.iot.utils.models.BoardAuthenticationData
 import com.robotutor.iot.utils.models.UserAuthenticationData
 import com.robotutor.iot.utils.models.UserBoardAuthenticationData
 import com.robotutor.iot.utils.services.IdGeneratorService
@@ -67,7 +68,7 @@ class CollectionOfButtonsService(
         addButtonRequest: AddButtonRequest,
         userBoardAuthenticationData: UserBoardAuthenticationData
     ): Mono<CollectionOfButtons> {
-        return collectionOfButtonsRepository.findAllByWidgetIdAndAccountId(
+        return collectionOfButtonsRepository.findByWidgetIdAndAccountId(
             widgetId,
             userBoardAuthenticationData.accountId
         )
@@ -89,7 +90,7 @@ class CollectionOfButtonsService(
         addButtonRequest: AddButtonRequest,
         userBoardAuthenticationData: UserBoardAuthenticationData
     ): Mono<CollectionOfButtons> {
-        return collectionOfButtonsRepository.findAllByWidgetIdAndAccountId(
+        return collectionOfButtonsRepository.findByWidgetIdAndAccountId(
             widgetId,
             userBoardAuthenticationData.accountId
         )
@@ -106,7 +107,7 @@ class CollectionOfButtonsService(
         buttonId: String,
         userBoardAuthenticationData: UserBoardAuthenticationData
     ): Mono<CollectionOfButtons> {
-        return collectionOfButtonsRepository.findAllByWidgetIdAndAccountId(
+        return collectionOfButtonsRepository.findByWidgetIdAndAccountId(
             widgetId,
             userBoardAuthenticationData.accountId
         )
@@ -124,7 +125,7 @@ class CollectionOfButtonsService(
         value: Int,
         userBoardAuthenticationData: UserBoardAuthenticationData
     ): Mono<CollectionOfButtons> {
-        return collectionOfButtonsRepository.findAllByWidgetIdAndAccountId(
+        return collectionOfButtonsRepository.findByWidgetIdAndAccountId(
             widgetId,
             userBoardAuthenticationData.accountId
         )
@@ -145,6 +146,24 @@ class CollectionOfButtonsService(
             .auditOnError(mqttPublisher, AuditEvent.COLLECTION_OF_BUTTONS_UPDATE_BUTTON_VALUE)
             .logOnSuccess(message = "Successfully updated button value in Collection of buttons widget")
             .logOnError(errorMessage = "Failed to update button value in Collection of buttons widget")
+    }
+
+    fun updateSensorValue(
+        widgetId: WidgetId,
+        buttonId: String,
+        value: Int,
+        boardAuthenticationData: BoardAuthenticationData
+    ): Mono<CollectionOfButtons> {
+        return collectionOfButtonsRepository.findByWidgetIdAndAccountId(
+            widgetId,
+            boardAuthenticationData.accountId
+        )
+            .map { it.updateButtonValue(buttonId, value) }
+            .flatMap { collectionOfButtonsRepository.save(it) }
+            .auditOnSuccess(mqttPublisher, AuditEvent.COLLECTION_OF_BUTTONS_UPDATE_SENSOR_VALUE)
+            .auditOnError(mqttPublisher, AuditEvent.COLLECTION_OF_BUTTONS_UPDATE_SENSOR_VALUE)
+            .logOnSuccess(message = "Successfully updated sensor value in Collection of buttons widget")
+            .logOnError(errorMessage = "Failed to update sensor value in Collection of buttons widget")
     }
 
 }
