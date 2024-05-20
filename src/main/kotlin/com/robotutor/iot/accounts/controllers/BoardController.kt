@@ -43,7 +43,7 @@ class BoardController(private val boardService: BoardService) {
     }
 
     @RequirePolicy("BOARD_STATUS_UPDATE")
-    @GetMapping("/heartbeat")
+    @PutMapping("/heartbeat")
     fun updateBoardStatus(boardAuthenticationData: BoardAuthenticationData): Mono<BoardView> {
         return boardService.updateBoardStatus(boardAuthenticationData)
             .map { board -> BoardView.from(board) }
