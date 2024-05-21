@@ -1,6 +1,7 @@
 package com.robotutor.iot.accounts.controllers.views
 
 import com.robotutor.iot.accounts.models.*
+import com.robotutor.iot.utils.models.UserAuthenticationData
 
 data class AccountView(
     val projectId: AccountId,
@@ -8,11 +9,11 @@ data class AccountView(
     val user: User,
 ) {
     companion object {
-        fun from(account: Account): AccountView {
+        fun from(account: Account, userAuthenticationData: UserAuthenticationData): AccountView {
             return AccountView(
                 projectId = account.accountId,
                 name = account.name,
-                user = account.users.first(),
+                user = account.users.find { it.userId == userAuthenticationData.userId }!!,
             )
         }
     }

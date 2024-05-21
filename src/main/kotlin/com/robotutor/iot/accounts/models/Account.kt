@@ -17,11 +17,15 @@ data class Account(
     var id: ObjectId? = null,
     @Indexed(unique = true)
     val accountId: AccountId,
-    val name: String,
+    var name: String,
     val owner: String,
     val users: List<User> = emptyList(),
     val createdAt: LocalDateTime = LocalDateTime.now()
 ) {
+    fun updateName(name: String): Account {
+        this.name = name;
+        return this
+    }
 
     companion object {
         fun from(

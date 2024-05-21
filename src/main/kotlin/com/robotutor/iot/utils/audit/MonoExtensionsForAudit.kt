@@ -5,6 +5,7 @@ import com.robotutor.iot.mqtt.models.AuditMessage
 import com.robotutor.iot.mqtt.models.AuditStatus
 import com.robotutor.iot.mqtt.models.MqttTopicName
 import com.robotutor.iot.mqtt.services.MqttPublisher
+import com.robotutor.iot.utils.models.UserAuthenticationData
 import reactor.core.publisher.Mono
 import reactor.util.context.ContextView
 import java.time.LocalDateTime
@@ -69,5 +70,10 @@ private fun getAccountId(contextView: ContextView): String? {
 }
 
 private fun getUserId(contextView: ContextView): String {
-    return contextView.getOrDefault("userId", "missing-user-id") ?: "missing-user-id"
+    try {
+        val userAuthenticationData = contextView.get(UserAuthenticationData::class.java)
+        return userAuthenticationData.userId
+    } catch (ex: Exception) {
+        return "missing-user-id"
+    }
 }

@@ -43,10 +43,6 @@ class AccountService(
 
     fun getAccounts(userId: String): Flux<Account> {
         return accountRepository.findAllByUserId(userId)
-            .map { account ->
-                val users = account.users.find { it.userId == userId }
-                account.copy(users = listOf(users!!))
-            }
     }
 
     fun isAccountExistsWithRole(
@@ -68,9 +64,15 @@ class AccountService(
 
     fun getAccountDetails(userAuthenticationData: UserAuthenticationData): Mono<Account> {
         return accountRepository.findByAccountId(userAuthenticationData.accountId)
-            .map { account ->
-                val users = account.users.find { it.userId == userAuthenticationData.userId }
-                account.copy(users = listOf(users!!))
-            }
+    }
+
+    fun updateAccountName(name: String, userAuthenticationData: UserAuthenticationData): Mono<Account> {
+        return accountRepository.findByAccountId(userAuthenticationData.accountId)
+            .map { it.updateName(name) }
+            .flatMap { accountRepository.save(it) }
+            .auditOnSuccess(mqttPublisher, AuditEvent.UPDATE_ACCOUNT_NAME, metadata = mapOf("name" to name))
+            .auditOnError(mqttPublisher, AuditEvent.UPDATE_ACCOUNT_NAME, metadata = mapOf("name" to name))
+            .logOnSuccess(message = "Successfully updated Account name")
+            .logOnError(errorMessage = "Failed to update Account name")
     }
 }

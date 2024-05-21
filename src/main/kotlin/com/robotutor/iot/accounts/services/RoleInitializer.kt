@@ -37,7 +37,8 @@ class RoleInitializer(private val roleService: RoleService, private val policyIn
                     "21",
                     "22",
                     "23",
-                    "24"
+                    "24",
+                    "26"
                 ).map { policyInitializer.getPolicyId(it) }),
             Role(roleId = "2".padStart(IdType.ROLE_ID.length, '0'),
                 name = "Admin",
