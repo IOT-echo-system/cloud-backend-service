@@ -50,7 +50,8 @@ data class Widget(
 
 enum class WidgetType {
     INVOICE,
-    COLLECTION_OF_BUTTONS
+    COLLECTION_OF_BUTTONS,
+    LEVEL_MONITOR
 }
 
 open class WidgetState

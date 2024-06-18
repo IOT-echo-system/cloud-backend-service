@@ -38,6 +38,14 @@ class PolicyInitializer(private val policyRepository: PolicyRepository) : Applic
             Policy(policyId = getPolicyId("24"), name = "WIDGET_COLLECTION_OF_BUTTONS_DELETE"),
             Policy(policyId = getPolicyId("25"), name = "WIDGET_COLLECTION_OF_BUTTONS_UPDATE_SENSOR_VALUE"),
             Policy(policyId = getPolicyId("26"), name = "PROJECT_UPDATE"),
+            Policy(policyId = getPolicyId("27"), name = "ROUTINE_GET"),
+            Policy(policyId = getPolicyId("28"), name = "ROUTINE_CREATE"),
+            Policy(policyId = getPolicyId("29"), name = "ROUTINE_UPDATE"),
+            Policy(policyId = getPolicyId("30"), name = "ROUTINE_DELETE"),
+            Policy(policyId = getPolicyId("31"), name = "WIDGET_LEVEL_MONITOR_GET"),
+            Policy(policyId = getPolicyId("32"), name = "WIDGET_LEVEL_MONITOR_CREATE"),
+            Policy(policyId = getPolicyId("33"), name = "WIDGET_LEVEL_MONITOR_UPDATE"),
+            Policy(policyId = getPolicyId("34"), name = "WIDGET_LEVEL_MONITOR_DELETE"),
         )
         policies.forEach { policy ->
             policyRepository.findByPolicyId(policy.policyId)
