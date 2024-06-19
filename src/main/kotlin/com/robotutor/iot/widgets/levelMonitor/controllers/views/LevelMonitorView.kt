@@ -3,6 +3,7 @@ package com.robotutor.iot.widgets.levelMonitor.controllers.views
 import com.robotutor.iot.widgets.levelMonitor.modals.LevelMonitor
 import com.robotutor.iot.widgets.modals.WidgetId
 import com.robotutor.iot.widgets.modals.WidgetType
+import jakarta.validation.constraints.Pattern
 import jakarta.validation.constraints.Positive
 import jakarta.validation.constraints.PositiveOrZero
 import jakarta.validation.constraints.Size
@@ -49,4 +50,13 @@ data class LevelMonitorValuesRequest(
 
     @field:Size(min = 1, max = 12, message = "Symbol should not be less than 1 char or more than 12 char")
     val symbol: String
+)
+
+data class CaptureValueRequest(
+    @field:Pattern(regexp = "^(min|max)$", message = "Type should be min or max")
+    val type: String,
+)
+
+data class SensorValueRequest(
+    val value: Double,
 )

@@ -46,6 +46,7 @@ class PolicyInitializer(private val policyRepository: PolicyRepository) : Applic
             Policy(policyId = getPolicyId("32"), name = "WIDGET_LEVEL_MONITOR_CREATE"),
             Policy(policyId = getPolicyId("33"), name = "WIDGET_LEVEL_MONITOR_UPDATE"),
             Policy(policyId = getPolicyId("34"), name = "WIDGET_LEVEL_MONITOR_DELETE"),
+            Policy(policyId = getPolicyId("35"), name = "WIDGET_LEVEL_MONITOR_SENSOR_VALUE_UPDATE"),
         )
         policies.forEach { policy ->
             policyRepository.findByPolicyId(policy.policyId)

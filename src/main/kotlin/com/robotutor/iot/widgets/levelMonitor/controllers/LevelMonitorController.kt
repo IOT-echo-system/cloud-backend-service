@@ -1,10 +1,13 @@
 package com.robotutor.iot.widgets.levelMonitor.controllers
 
 import com.robotutor.iot.utils.filters.annotations.RequirePolicy
+import com.robotutor.iot.utils.models.BoardAuthenticationData
 import com.robotutor.iot.utils.models.UserAuthenticationData
 import com.robotutor.iot.utils.models.UserBoardAuthenticationData
+import com.robotutor.iot.widgets.levelMonitor.controllers.views.CaptureValueRequest
 import com.robotutor.iot.widgets.levelMonitor.controllers.views.LevelMonitorValuesRequest
 import com.robotutor.iot.widgets.levelMonitor.controllers.views.LevelMonitorView
+import com.robotutor.iot.widgets.levelMonitor.controllers.views.SensorValueRequest
 import com.robotutor.iot.widgets.levelMonitor.services.LevelMonitorService
 import com.robotutor.iot.widgets.modals.WidgetId
 import org.springframework.validation.annotation.Validated
@@ -34,7 +37,7 @@ class LevelMonitorController(private val levelMonitorService: LevelMonitorServic
 
     @RequirePolicy("WIDGET_LEVEL_MONITOR_UPDATE")
     @PutMapping("/{widgetId}/values")
-    fun updateSeedData(
+    fun updateValues(
         @PathVariable widgetId: WidgetId,
         @Validated @RequestBody levelMonitorValuesRequest: LevelMonitorValuesRequest,
         userBoardAuthenticationData: UserBoardAuthenticationData
@@ -42,4 +45,27 @@ class LevelMonitorController(private val levelMonitorService: LevelMonitorServic
         return levelMonitorService.updateValues(widgetId, levelMonitorValuesRequest, userBoardAuthenticationData)
             .map { LevelMonitorView.form(it) }
     }
+
+    @RequirePolicy("WIDGET_LEVEL_MONITOR_UPDATE")
+    @PutMapping("/{widgetId}/capture-value")
+    fun captureValue(
+        @PathVariable widgetId: WidgetId,
+        @Validated @RequestBody captureValueRequest: CaptureValueRequest,
+        userBoardAuthenticationData: UserBoardAuthenticationData
+    ): Mono<LevelMonitorView> {
+        return levelMonitorService.captureValue(widgetId, captureValueRequest, userBoardAuthenticationData)
+            .map { LevelMonitorView.form(it) }
+    }
+
+    @RequirePolicy("WIDGET_LEVEL_MONITOR_SENSOR_VALUE_UPDATE")
+    @PutMapping("/{widgetId}/value")
+    fun updateSensorValue(
+        @PathVariable widgetId: WidgetId,
+        @Validated @RequestBody sensorValueRequest: SensorValueRequest,
+        boardAuthenticationData: BoardAuthenticationData
+    ): Mono<LevelMonitorView> {
+        return levelMonitorService.updateValue(widgetId, sensorValueRequest, boardAuthenticationData)
+            .map { LevelMonitorView.form(it) }
+    }
+
 }

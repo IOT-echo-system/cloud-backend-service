@@ -1,6 +1,8 @@
 package com.robotutor.iot.widgets.levelMonitor.modals
 
+import com.robotutor.iot.widgets.levelMonitor.controllers.views.CaptureValueRequest
 import com.robotutor.iot.widgets.levelMonitor.controllers.views.LevelMonitorValuesRequest
+import com.robotutor.iot.widgets.levelMonitor.controllers.views.SensorValueRequest
 import com.robotutor.iot.widgets.modals.WidgetId
 import com.robotutor.iot.widgets.modals.WidgetType
 import org.bson.types.ObjectId
@@ -24,9 +26,9 @@ data class LevelMonitor(
     val widgetId: WidgetId,
     val boardId: String,
     val accountId: String,
-    val minValue: Double = 0.0,
-    val maxValue: Double = 1.0,
-    val value: Double = 0.0,
+    var minValue: Double = 0.0,
+    var maxValue: Double = 1.0,
+    var value: Double = 0.0,
     var minRange: Double = 0.0,
     var maxRange: Double = 100.0,
     var symbol: String = "%",
@@ -39,6 +41,21 @@ data class LevelMonitor(
         this.minRange = levelMonitorValuesRequest.minValue
         this.maxRange = levelMonitorValuesRequest.maxValue
         this.symbol = levelMonitorValuesRequest.symbol
+        return this
+    }
+
+    fun captureValue(captureValuesRequest: CaptureValueRequest): LevelMonitor {
+        if (captureValuesRequest.type.equals("min", ignoreCase = true)) {
+            this.minValue = value
+        }
+        if (captureValuesRequest.type.equals("max", ignoreCase = true)) {
+            this.maxValue = value
+        }
+        return this
+    }
+
+    fun updateValue(sensorValueRequest: SensorValueRequest): LevelMonitor {
+        this.value = sensorValueRequest.value
         return this
     }
 
