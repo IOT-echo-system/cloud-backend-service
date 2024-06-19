@@ -29,6 +29,7 @@ data class LevelMonitor(
     var minValue: Double = 0.0,
     var maxValue: Double = 1.0,
     var value: Double = 0.0,
+    var actualValue: Double = 0.0,
     var minRange: Double = 0.0,
     var maxRange: Double = 100.0,
     var symbol: String = "%",
@@ -41,21 +42,26 @@ data class LevelMonitor(
         this.minRange = levelMonitorValuesRequest.minValue
         this.maxRange = levelMonitorValuesRequest.maxValue
         this.symbol = levelMonitorValuesRequest.symbol
-        return this
+        return this.updateValue()
     }
 
     fun captureValue(captureValuesRequest: CaptureValueRequest): LevelMonitor {
         if (captureValuesRequest.type.equals("min", ignoreCase = true)) {
-            this.minValue = value
+            this.minValue = this.actualValue
         }
         if (captureValuesRequest.type.equals("max", ignoreCase = true)) {
-            this.maxValue = value
+            this.maxValue = this.actualValue
         }
-        return this
+        return this.updateValue()
     }
 
-    fun updateValue(sensorValueRequest: SensorValueRequest): LevelMonitor {
-        this.value = sensorValueRequest.value
+    fun updateActualValue(sensorValueRequest: SensorValueRequest): LevelMonitor {
+        this.actualValue = sensorValueRequest.value
+        return this.updateValue()
+    }
+
+    private fun updateValue(): LevelMonitor {
+        this.value = (this.actualValue - minValue) * (maxRange - minRange) / (maxValue - minValue) + minRange
         return this
     }
 

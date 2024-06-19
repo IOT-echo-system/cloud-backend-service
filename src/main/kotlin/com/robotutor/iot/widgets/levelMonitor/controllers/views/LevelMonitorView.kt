@@ -18,6 +18,7 @@ data class LevelMonitorView(
     val minValue: Double,
     val maxValue: Double,
     val value: Double,
+    val actualValue: Double,
     val minRange: Double,
     val maxRange: Double,
     val symbol: String,
@@ -36,6 +37,7 @@ data class LevelMonitorView(
                 minRange = levelMonitor.minRange,
                 maxRange = levelMonitor.maxRange,
                 symbol = levelMonitor.symbol,
+                actualValue = levelMonitor.actualValue
             )
         }
     }

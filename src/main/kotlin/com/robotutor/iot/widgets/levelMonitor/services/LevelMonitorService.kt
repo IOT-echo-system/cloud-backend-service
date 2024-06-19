@@ -94,7 +94,7 @@ class LevelMonitorService(
         boardAuthenticationData: BoardAuthenticationData
     ): Mono<LevelMonitor> {
         return levelMonitorRepository.findByWidgetIdAndBoardId(widgetId, boardAuthenticationData.boardId)
-            .map { it.updateValue(sensorValueRequest) }
+            .map { it.updateActualValue(sensorValueRequest) }
             .flatMap { levelMonitorRepository.save(it) }
             .auditOnSuccess(mqttPublisher, AuditEvent.LEVEL_MONITOR_WIDGET_SENSOR_VALUE_UPDATE)
             .auditOnError(mqttPublisher, AuditEvent.LEVEL_MONITOR_WIDGET_SENSOR_VALUE_UPDATE)
