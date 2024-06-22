@@ -50,3 +50,5 @@ app:
   widgets:
     node-bff:
       base-url: ${NODE_BFF_URL}/api
+    cloud-bff:
+      base-url: ${CLOUD_BFF_URL}/api
