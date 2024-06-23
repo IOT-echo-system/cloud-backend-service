@@ -61,7 +61,8 @@ data class LevelMonitor(
     }
 
     private fun updateValue(): LevelMonitor {
-        this.value = (this.actualValue - minValue) * (maxRange - minRange) / (maxValue - minValue) + minRange
+        val delta = if (this.maxValue - this.minValue == 0.0) 1.0 else this.maxValue - this.minValue
+        this.value = (this.actualValue - this.minValue) * (this.maxRange - this.minRange) / delta + this.minRange
         return this
     }
 
