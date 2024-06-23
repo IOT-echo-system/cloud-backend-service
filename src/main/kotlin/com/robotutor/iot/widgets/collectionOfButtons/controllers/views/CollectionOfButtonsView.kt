@@ -12,7 +12,7 @@ import java.time.LocalDateTime
 data class CollectionOfButtonsView(
     val widgetId: WidgetId,
     val boardId: String,
-    val accountId: String,
+    val projectId: String,
     val widgetType: WidgetType,
     val buttons: List<ButtonView>,
     val createdAt: LocalDateTime,
@@ -23,7 +23,7 @@ data class CollectionOfButtonsView(
             return CollectionOfButtonsView(
                 widgetId = collectionOfButtons.widgetId,
                 boardId = collectionOfButtons.boardId,
-                accountId = collectionOfButtons.accountId,
+                projectId = collectionOfButtons.accountId,
                 widgetType = collectionOfButtons.widgetType,
                 buttons = collectionOfButtons.buttons.map { ButtonView.from(it) },
                 createdAt = collectionOfButtons.createdAt,
