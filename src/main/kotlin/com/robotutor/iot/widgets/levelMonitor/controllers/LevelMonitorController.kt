@@ -4,6 +4,7 @@ import com.robotutor.iot.utils.filters.annotations.RequirePolicy
 import com.robotutor.iot.utils.models.BoardAuthenticationData
 import com.robotutor.iot.utils.models.UserAuthenticationData
 import com.robotutor.iot.utils.models.UserBoardAuthenticationData
+import com.robotutor.iot.widgets.gateway.CloudBffGateway
 import com.robotutor.iot.widgets.levelMonitor.controllers.views.CaptureValueRequest
 import com.robotutor.iot.widgets.levelMonitor.controllers.views.LevelMonitorValuesRequest
 import com.robotutor.iot.widgets.levelMonitor.controllers.views.LevelMonitorView
@@ -17,7 +18,10 @@ import reactor.core.publisher.Mono
 
 @RestController
 @RequestMapping("/widgets/level-monitor")
-class LevelMonitorController(private val levelMonitorService: LevelMonitorService) {
+class LevelMonitorController(
+    private val levelMonitorService: LevelMonitorService,
+    private val cloudBffGateway: CloudBffGateway
+) {
 
     @RequirePolicy("WIDGET_LEVEL_MONITOR_CREATE")
     @PostMapping
@@ -66,6 +70,9 @@ class LevelMonitorController(private val levelMonitorService: LevelMonitorServic
     ): Mono<LevelMonitorView> {
         return levelMonitorService.updateValue(widgetId, sensorValueRequest, boardAuthenticationData)
             .map { LevelMonitorView.form(it) }
+            .flatMap { levelMonitorView ->
+                cloudBffGateway.updateWidget(levelMonitorView).map { levelMonitorView }
+            }
     }
 
 }

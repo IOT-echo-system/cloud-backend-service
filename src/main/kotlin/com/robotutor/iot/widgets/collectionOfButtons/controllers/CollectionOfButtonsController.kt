@@ -8,6 +8,7 @@ import com.robotutor.iot.widgets.collectionOfButtons.controllers.views.AddButton
 import com.robotutor.iot.widgets.collectionOfButtons.controllers.views.ButtonValueRequest
 import com.robotutor.iot.widgets.collectionOfButtons.controllers.views.CollectionOfButtonsView
 import com.robotutor.iot.widgets.collectionOfButtons.services.CollectionOfButtonsService
+import com.robotutor.iot.widgets.gateway.CloudBffGateway
 import com.robotutor.iot.widgets.modals.WidgetId
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.*
@@ -16,7 +17,10 @@ import reactor.core.publisher.Mono
 
 @RestController
 @RequestMapping("/widgets/collection-of-buttons")
-class CollectionOfButtonsController(private val collectionOfButtonsService: CollectionOfButtonsService) {
+class CollectionOfButtonsController(
+    private val collectionOfButtonsService: CollectionOfButtonsService,
+    private val cloudBffGateway: CloudBffGateway
+) {
 
     @RequirePolicy("WIDGET_COLLECTION_OF_BUTTONS_CREATE")
     @PostMapping
@@ -106,5 +110,8 @@ class CollectionOfButtonsController(private val collectionOfButtonsService: Coll
             boardAuthenticationData
         )
             .map { CollectionOfButtonsView.form(it) }
+            .flatMap { collectionOfButtonsView ->
+                cloudBffGateway.updateWidget(collectionOfButtonsView).map { collectionOfButtonsView }
+            }
     }
 }

@@ -4,6 +4,7 @@ import com.robotutor.iot.utils.filters.annotations.RequirePolicy
 import com.robotutor.iot.utils.models.BoardAuthenticationData
 import com.robotutor.iot.utils.models.UserAuthenticationData
 import com.robotutor.iot.utils.models.UserBoardAuthenticationData
+import com.robotutor.iot.widgets.gateway.CloudBffGateway
 import com.robotutor.iot.widgets.invoice.controllers.views.*
 import com.robotutor.iot.widgets.invoice.services.InvoiceService
 import com.robotutor.iot.widgets.modals.WidgetId
@@ -14,7 +15,7 @@ import reactor.core.publisher.Mono
 
 @RestController
 @RequestMapping("/widgets/invoices")
-class InvoiceController(private val invoiceService: InvoiceService) {
+class InvoiceController(private val invoiceService: InvoiceService, private val cloudBffGateway: CloudBffGateway) {
 
     @RequirePolicy("WIDGET_INVOICE_CREATE")
     @PostMapping

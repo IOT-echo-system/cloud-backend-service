@@ -10,10 +10,8 @@ import com.robotutor.iot.utils.models.BoardAuthenticationData
 import com.robotutor.iot.utils.models.UserAuthenticationData
 import com.robotutor.iot.utils.models.UserBoardAuthenticationData
 import com.robotutor.iot.utils.services.IdGeneratorService
-import com.robotutor.iot.widgets.gateway.CloudBffGateway
 import com.robotutor.iot.widgets.levelMonitor.controllers.views.CaptureValueRequest
 import com.robotutor.iot.widgets.levelMonitor.controllers.views.LevelMonitorValuesRequest
-import com.robotutor.iot.widgets.levelMonitor.controllers.views.LevelMonitorView
 import com.robotutor.iot.widgets.levelMonitor.controllers.views.SensorValueRequest
 import com.robotutor.iot.widgets.levelMonitor.modals.LevelMonitor
 import com.robotutor.iot.widgets.levelMonitor.repositories.LevelMonitorRepository
@@ -32,7 +30,6 @@ class LevelMonitorService(
     private val idGeneratorService: IdGeneratorService,
     private val widgetService: WidgetService,
     private val mqttPublisher: MqttPublisher,
-    private val cloudBffGateway: CloudBffGateway
 ) {
     fun addLevelMonitor(userBoardAuthenticationData: UserBoardAuthenticationData): Mono<LevelMonitor> {
         return idGeneratorService.generateId(IdType.WIDGET_ID)
@@ -97,9 +94,6 @@ class LevelMonitorService(
         return levelMonitorRepository.findByWidgetIdAndBoardId(widgetId, boardAuthenticationData.boardId)
             .map { it.updateActualValue(sensorValueRequest) }
             .flatMap { levelMonitorRepository.save(it) }
-            .flatMap { levelMonitor ->
-                cloudBffGateway.updateWidget(LevelMonitorView.form(levelMonitor)).map { levelMonitor }
-            }
             .auditOnSuccess(mqttPublisher, AuditEvent.LEVEL_MONITOR_WIDGET_SENSOR_VALUE_UPDATE)
             .auditOnError(mqttPublisher, AuditEvent.LEVEL_MONITOR_WIDGET_SENSOR_VALUE_UPDATE)
             .logOnSuccess(message = "Successfully updated sensor value for level monitor")
