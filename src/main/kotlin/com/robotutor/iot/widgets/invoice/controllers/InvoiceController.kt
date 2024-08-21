@@ -76,11 +76,7 @@ class InvoiceController(private val invoiceService: InvoiceService, private val 
         @PathVariable widgetId: WidgetId,
         boardAuthenticationData: BoardAuthenticationData
     ): Mono<InvoiceState> {
-        return invoiceService.resetItems(widgetId, boardAuthenticationData)
-            .flatMap { invoice ->
-                cloudBffGateway.updateWidget(InvoiceView.form(invoice))
-                    .map { InvoiceState.from(invoice) }
-            }
+        return invoiceService.resetItems(widgetId, boardAuthenticationData).map { InvoiceState.from(it) }
     }
 
     @RequirePolicy("WIDGET_INVOICE_ITEM_UPDATE")
@@ -91,10 +87,7 @@ class InvoiceController(private val invoiceService: InvoiceService, private val 
         boardAuthenticationData: BoardAuthenticationData
     ): Mono<InvoiceState> {
         return invoiceService.addItem(widgetId, code, boardAuthenticationData)
-            .flatMap { invoiceWithError ->
-                cloudBffGateway.updateWidget(InvoiceView.form(invoiceWithError.invoice))
-                    .map { InvoiceState.from(invoiceWithError.invoice, invoiceWithError.error) }
-            }
+            .map { InvoiceState.from(it.invoice, it.error) }
     }
 
     @RequirePolicy("WIDGET_INVOICE_ITEM_UPDATE")
@@ -105,10 +98,7 @@ class InvoiceController(private val invoiceService: InvoiceService, private val 
         boardAuthenticationData: BoardAuthenticationData
     ): Mono<InvoiceState> {
         return invoiceService.removeItem(widgetId, code, boardAuthenticationData)
-            .flatMap { invoiceWithError ->
-                cloudBffGateway.updateWidget(InvoiceView.form(invoiceWithError.invoice))
-                    .map { InvoiceState.from(invoiceWithError.invoice, invoiceWithError.error) }
-            }
+            .map { InvoiceState.from(it.invoice, it.error) }
     }
 
     @RequirePolicy("WIDGET_INVOICE_ITEM_UPDATE")
@@ -117,11 +107,7 @@ class InvoiceController(private val invoiceService: InvoiceService, private val 
         @PathVariable widgetId: WidgetId,
         boardAuthenticationData: BoardAuthenticationData
     ): Mono<InvoiceState> {
-        return invoiceService.getInvoice(widgetId, boardAuthenticationData)
-            .flatMap { invoice ->
-                cloudBffGateway.updateWidget(InvoiceView.form(invoice))
-                    .map { InvoiceState.from(invoice) }
-            }
+        return invoiceService.getInvoice(widgetId, boardAuthenticationData).map { InvoiceState.from(it) }
     }
 
     @RequirePolicy("WIDGET_INVOICE_PAYMENT_UPDATE")
